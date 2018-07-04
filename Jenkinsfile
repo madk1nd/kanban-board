@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'atlassianlabs/docker-node-jdk-chrome-firefox'
-            args '-v /root/.m2:/root/.m2 -p 8888:8080'
+            args '-v /root/.m2:/root/.m2 -p 8888:8888'
         }
     }
     stages {
@@ -23,7 +23,7 @@ pipeline {
         }
         stage('Deliver') {
              steps {
-                 sh './start.sh'
+                 sh 'chmod +x start.sh; ./start.sh'
              }
         }
     }
