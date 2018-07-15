@@ -1,13 +1,21 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <kanban-header></kanban-header>
     <router-view/>
+    <kanban-footer></kanban-footer>
   </div>
 </template>
 
 <script>
+import KanbanHeader from '@/components/KanbanHeader'
+import KanbanFooter from '@/components/KanbanFooter'
+
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    'kanban-header': KanbanHeader,
+    'kanban-footer': KanbanFooter
+  }
 }
 </script>
 
@@ -18,6 +26,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  border: 1px solid black;
 }
 </style>
