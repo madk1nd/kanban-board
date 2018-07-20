@@ -2,15 +2,13 @@
   <div id="kanban-board">
     <h1>Hello, {{ name }}</h1>
     <div id="board">
-      <kanban-list></kanban-list>
-      <kanban-list></kanban-list>
-      <kanban-list></kanban-list>
+      <kanban-list v-bind="lists"></kanban-list>
     </div>
   </div>
 </template>
 
 <script>
-import KanbanList from '@/components/board/KanbanList.vue'
+import KanbanList from '@/components/board/KanbanList'
 
 export default {
   components: { KanbanList },
@@ -18,6 +16,7 @@ export default {
   data () {
     return {
       msg: 'Welcome to Your Vue.js App!',
+      lists: [],
       name: 'Sergey'
     }
   }

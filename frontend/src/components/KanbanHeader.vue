@@ -1,6 +1,6 @@
 <template>
   <div id="kanban-header">
-    <h2>This is the footer</h2>
+    <h2>This is the header</h2>
   </div>
 </template>
 
