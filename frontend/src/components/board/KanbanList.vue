@@ -1,11 +1,23 @@
 <template>
   <div id="kanban-list">
     <h2>This is the List</h2>
+    <p>{{ title }}</p>
+    <p>{{ num }}</p>
+  <button @click="$emit('remove')">remove</button>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    title: String,
+    num: Number
+  },
+  methods: {
+    remove: function () {
+      alert('deleted')
+    }
+  },
   name: 'KanbanList'
 }
 </script>
