@@ -1,29 +1,61 @@
 <template>
-  <div id="kanban-list">
-    <h2>This is the List</h2>
-    <p>{{ title }}</p>
-    <p>{{ num }}</p>
-  <button @click="$emit('remove')">remove</button>
+  <div class="kanban-list">
+    <div>
+      <input type="text" placeholder="Start typing..." v-model="newtask">
+      <button @click="add(newtask)">add</button>
+    </div>
+    <kanban-task
+      v-for="(task, index) in tasks"
+      :key="task.id"
+      :text="task.text"
+      v-on:remove="tasks.splice(index, 1)">
+    </kanban-task>
+    <button @click="$emit('remove')">remove</button>
   </div>
 </template>
 
 <script>
+import KanbanTask from '@/components/board/KanbanTask.vue'
+
 export default {
+  components: { KanbanTask },
   props: {
     title: String,
     num: Number
   },
+  name: 'KanbanList',
   methods: {
-    remove: function () {
-      alert('deleted')
+    add: function (newText) {
+      if (newText === '') {
+        alert('Please enter the text of the task')
+        return
+      }
+      this.tasks.push(
+        {
+          id: Math.random() * 1000000,
+          text: newText
+        }
+      )
+      this.newtask = ''
     }
   },
-  name: 'KanbanList'
+  data () {
+    return {
+      counter: Math.random() * 1000000,
+      newtask: '',
+      tasks: [
+        {
+          id: 1,
+          text: 'This is my first task'
+        }
+      ]
+    }
+  }
 }
 </script>
 
 <style scoped>
-#kanban-list {
+.kanban-list {
   border: 1px solid green;
   width: 300px;
   display: inline-block;
