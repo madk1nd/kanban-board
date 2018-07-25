@@ -28,4 +28,13 @@ export default {
   color: #2c3e50;
   border: 1px solid black;
 }
+button {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+}
+button:hover {
+  background-color:  #f9cd0b;
+  border-color: black;
+}
 </style>

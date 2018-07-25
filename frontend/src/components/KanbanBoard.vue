@@ -1,7 +1,7 @@
 <template>
   <div id="kanban-board">
     <h1>Hello, {{ name }}</h1>
-    <button @click="create(lists)">Add New...</button>
+    <div class="board-button-add" @click="create(lists)"><p>+</p></div>
     <div id="board">
       <kanban-list v-for="(list, index) in lists"
                    :key="list.id"
@@ -54,9 +54,27 @@ export default {
   border: 1px solid red;
 }
 #board {
+  margin: 10px;
   border: 1px solid blue;
   overflow-x: auto;
   white-space: nowrap;
   text-align: left;
+}
+.board-button-add {
+  background-color: #aaffaa;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  line-height: 60px;
+  margin: 0 auto;
+}
+.board-button-add:active {
+  background-color: #000041;
+  transform: translateY(2px);
+}
+p {
 }
 </style>

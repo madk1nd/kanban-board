@@ -1,8 +1,8 @@
 <template>
   <div class="kanban-list">
-    <div>
+    <div class="kanban-add-card">
       <input type="text" placeholder="Start typing..." v-model="newtask">
-      <button @click="add(newtask)">add</button>
+      <button class="list-button-add" @click="add(newtask)">add</button>
     </div>
     <kanban-task
       v-for="(task, index) in tasks"
@@ -10,7 +10,7 @@
       :text="task.text"
       v-on:remove="tasks.splice(index, 1)">
     </kanban-task>
-    <button @click="$emit('remove')">remove</button>
+    <button class="list-button-remove" @click="$emit('remove')">remove</button>
   </div>
 </template>
 
@@ -55,10 +55,31 @@ export default {
 </script>
 
 <style scoped>
+* {
+  border-radius: 5px;
+}
 .kanban-list {
-  border: 1px solid green;
+  background-color: cornflowerblue;
+  box-shadow: 4px 4px 2px 1px rgba(0,0,0,0.2);
+  margin: 10px;
+  vertical-align: top;
   width: 300px;
   display: inline-block;
   text-align: center;
+}
+.kanban-add-card {
+  margin: 10px;
+}
+input {
+  width: 80%;
+}
+.list-button-add {
+  width: 20%;
+}
+.list-button-remove {
+  width: 290px;
+  display: inline-block;
+  padding: 5px;
+  margin: 0 5px 5px 5px;
 }
 </style>
