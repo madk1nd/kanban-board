@@ -4,21 +4,24 @@
       <input type="text" placeholder="Start typing..." v-model="newtask">
       <button class="list-button-add" @click="add(newtask)">add</button>
     </div>
-    <kanban-task
-      v-for="(task, index) in tasks"
-      :key="task.id"
-      :text="task.text"
-      v-on:remove="tasks.splice(index, 1)">
-    </kanban-task>
+    <draggable class="kanban-draggable-task" v-model="tasks" :options="{group:'id'}" @start="drag=true" @end="drag=false">
+      <kanban-task
+        v-for="(task, index) in tasks"
+        :key="task.id"
+        :text="task.text"
+        v-on:remove="tasks.splice(index, 1)">
+      </kanban-task>
+    </draggable>
     <button class="list-button-remove" @click="$emit('remove')">remove</button>
   </div>
 </template>
 
 <script>
 import KanbanTask from '@/components/board/KanbanTask.vue'
+import draggable from 'vuedraggable'
 
 export default {
-  components: { KanbanTask },
+  components: { KanbanTask, draggable },
   props: {
     title: String,
     num: Number
@@ -81,5 +84,11 @@ input {
   display: inline-block;
   padding: 5px;
   margin: 0 5px 5px 5px;
+}
+.kanban-draggable-task {
+  border: 2px solid rgba(255, 0, 0, 0);
+}
+.sortable-chosen {
+  border: 2px solid black;
 }
 </style>
