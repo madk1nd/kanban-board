@@ -24,6 +24,7 @@ pipeline {
         stage('Deliver') {
              steps {
                  sh 'chmod +x start.sh; ./start.sh'
+                 input 'Do you really want to stop application?'
              }
         }
     }
