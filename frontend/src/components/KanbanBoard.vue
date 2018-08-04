@@ -7,7 +7,7 @@
                    :key="list.id"
                    :title="list.title"
                    :num="list.number"
-                   v-on:remove="lists.splice(index, 1)"
+                   @remove="del(index, list.id)"
       ></kanban-list>
     </div>
   </div>
@@ -15,35 +15,48 @@
 
 <script>
 import KanbanList from '@/components/board/KanbanList'
+import axios from 'axios'
 
 export default {
   components: { KanbanList },
   name: 'KanbanBoard',
   methods: {
     create: function () {
-      let id = ++this.counter
-      this.lists.push(
-        {
-          id: id,
-          number: id,
-          title: 'new'
-        }
-      )
+      axios.put('http://localhost:8888/api/list/add', {}, { params: { ordinal: this.listCount + 1 } })
+        .then(response => {
+          this.lists.push(response.data)
+          this.listCount++
+        })
+        .catch(error => console.log(error))
+    },
+    del: function (idx, removedId) {
+      console.log('idx:' + idx)
+      console.log('removedId:' + removedId)
+      axios.delete('http://localhost:8888/api/list/delete', { params: { id: removedId } })
+        .then(response => {
+          this.lists.splice(idx, 1)
+          this.listCount--
+          console.log('getResponse')
+        })
+        .catch(error => console.log(error))
     }
   },
   data () {
     return {
       msg: 'Welcome to Your Vue.js App!',
-      lists: [
-        {
-          id: 1,
-          number: 123,
-          title: 'hello'
-        }
-      ],
-      counter: 1,
+      lists: [],
+      listCount: 0,
       name: 'Sergey'
     }
+  },
+  created () {
+    axios
+      .post('http://localhost:8888/api/list/all', {}, { params: { userId: 'admin' } })
+      .then(response => {
+        this.lists = response.data
+        this.listCount = response.data.length
+      })
+      .catch(error => console.log(error))
   }
 }
 </script>

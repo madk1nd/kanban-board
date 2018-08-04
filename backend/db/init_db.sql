@@ -8,3 +8,11 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT INTO users (username, password) VALUES ('admin', '12345');
+
+CREATE TABLE IF NOT EXISTS lists (
+  id SERIAL not null primary key,
+  ordinal INT not null,
+  title VARCHAR(255) not null
+);
+
+INSERT INTO lists (ordinal, title) VALUES ('1', 'FirstList'), ('2', 'SecondList'), ('3', 'ThirdList');
