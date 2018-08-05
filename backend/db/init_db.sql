@@ -16,8 +16,3 @@ CREATE TABLE IF NOT EXISTS lists (
 );
 
 INSERT INTO lists (ordinal, title) VALUES ('1', 'FirstList'), ('2', 'SecondList'), ('3', 'ThirdList');
-
-
-CREATE TABLE IF NOT EXISTS tasks (
-
-)

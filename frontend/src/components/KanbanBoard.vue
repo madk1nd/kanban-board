@@ -28,7 +28,7 @@ import KanbanList from '@/components/board/KanbanList'
 import axios from 'axios'
 import draggable from 'vuedraggable'
 
-const baseUrl = 'http://localhost:8888'
+const baseUrl = ''
 
 export default {
   components: { KanbanList, draggable },
