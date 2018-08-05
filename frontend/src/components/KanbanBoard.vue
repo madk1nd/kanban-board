@@ -11,7 +11,7 @@
       >
     </div>
     <div id="board">
-      <draggable class="kanban-draggable-list" v-model="lists" :options="{group:'ordinal'}" @start="drag=true" @end="drag=false">
+      <draggable class="kanban-draggable-list" v-model="lists" :options="{group:'ordinal'}" @start="drag=true" @end="onDragEnd">
         <kanban-list v-for="(list, index) in lists"
                      :key="list.id"
                      :title="list.title"
@@ -49,6 +49,9 @@ export default {
       .catch(error => console.log(error))
   },
   methods: {
+    onDragEnd: function () {
+      this.drag = false
+    },
     onFocusLost: function () {
       this.clicked = false
       this.newList = ''
@@ -58,20 +61,16 @@ export default {
       this.$nextTick(() => this.$refs.titleInput.focus())
     },
     create: function () {
-      let max = Math.max(...this.lists.map(o => o.ordinal), 1) + 1
+      let max = Math.max(...this.lists.map(list => list.ordinal), 1) + 1
       axios.post(baseUrl + '/api/list/add', {}, { params: { ordinal: max, title: this.newList } })
-        .then(response => {
-          this.lists.push(response.data)
-        })
+        .then(response => { this.lists.push(response.data) })
         .catch(error => console.log(error))
       this.clicked = false
       this.newList = ''
     },
     del: function (idx, removedId) {
       axios.delete(baseUrl + '/api/list/delete', { params: { id: removedId } })
-        .then(response => {
-          this.lists.splice(idx, 1)
-        })
+        .then(response => { this.lists.splice(idx, 1) })
         .catch(error => console.log(error))
     }
   }
