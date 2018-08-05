@@ -5,14 +5,8 @@
       <div class="board-button-add" v-show="!clicked" @click="enterListName()">
         <p>+</p>
       </div>
-      <input
-        ref="inp"
-        type="text"
-        v-show="clicked"
-        @keyup.enter="create()"
-        @keyup.escape="onFocusLost()"
-        @focusout="onFocusLost()"
-        v-model="newList"
+      <input ref="titleInput" type="text" v-show="clicked" @keyup.enter="create()"
+        @keyup.escape="onFocusLost()" @focusout="onFocusLost()" v-model="newList"
         placeholder="Enter new list name..."
       >
     </div>
@@ -48,9 +42,7 @@ export default {
   created () {
     axios
       .get(baseUrl + '/api/list/all', { params: { userId: 'admin' } })
-      .then(response => {
-        this.lists = response.data
-      })
+      .then(response => { this.lists = response.data })
       .catch(error => console.log(error))
   },
   methods: {
@@ -60,7 +52,7 @@ export default {
     },
     enterListName: function () {
       this.clicked = true
-      this.$nextTick(() => this.$refs.inp.focus())
+      this.$nextTick(() => this.$refs.titleInput.focus())
     },
     create: function () {
       let max = Math.max(...this.lists.map(o => o.ordinal), 1) + 1
