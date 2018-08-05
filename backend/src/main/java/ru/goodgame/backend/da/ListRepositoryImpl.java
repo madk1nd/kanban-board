@@ -37,4 +37,20 @@ public class ListRepositoryImpl implements ListRepository {
                 .where(lists.id.eq(id))
                 .execute();
     }
+
+    @Override
+    public KanbanList add(Integer ordinal, String title) {
+        QLists lists = QLists.lists;
+        factory.insert(lists)
+                .columns(lists.ordinal, lists.title)
+                .values(ordinal, title)
+                .execute();
+        return factory.select(lists.id, lists.ordinal, lists.title)
+                .from(lists)
+                .where(lists.ordinal.eq(ordinal))
+                .fetch()
+                .stream()
+                .map(KanbanList::from)
+                .findFirst().orElse(null);
+    }
 }

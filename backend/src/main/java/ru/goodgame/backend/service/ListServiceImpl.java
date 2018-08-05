@@ -25,4 +25,9 @@ public class ListServiceImpl implements ListService {
     public void deleteBy(Integer id) {
         listRepository.deleteBy(id);
     }
+
+    @Override
+    public KanbanList add(Integer ordinal, String title) {
+        return listRepository.add(ordinal, title);
+    }
 }

@@ -17,46 +17,42 @@
 import KanbanList from '@/components/board/KanbanList'
 import axios from 'axios'
 
+const baseUrl = 'http://localhost:8888'
+
 export default {
   components: { KanbanList },
   name: 'KanbanBoard',
-  methods: {
-    create: function () {
-      axios.put('http://localhost:8888/api/list/add', {}, { params: { ordinal: this.listCount + 1 } })
-        .then(response => {
-          this.lists.push(response.data)
-          this.listCount++
-        })
-        .catch(error => console.log(error))
-    },
-    del: function (idx, removedId) {
-      console.log('idx:' + idx)
-      console.log('removedId:' + removedId)
-      axios.delete('http://localhost:8888/api/list/delete', { params: { id: removedId } })
-        .then(response => {
-          this.lists.splice(idx, 1)
-          this.listCount--
-          console.log('getResponse')
-        })
-        .catch(error => console.log(error))
-    }
-  },
   data () {
     return {
       msg: 'Welcome to Your Vue.js App!',
       lists: [],
-      listCount: 0,
       name: 'Sergey'
     }
   },
   created () {
     axios
-      .post('http://localhost:8888/api/list/all', {}, { params: { userId: 'admin' } })
+      .get(baseUrl + '/api/list/all', { params: { userId: 'admin' } })
       .then(response => {
         this.lists = response.data
-        this.listCount = response.data.length
       })
       .catch(error => console.log(error))
+  },
+  methods: {
+    create: function () {
+      let max = Math.max(...this.lists.map(o => o.ordinal), 1) + 1
+      axios.post(baseUrl + '/api/list/add', {}, { params: { ordinal: max, title: 'new' } })
+        .then(response => {
+          this.lists.push(response.data)
+        })
+        .catch(error => console.log(error))
+    },
+    del: function (idx, removedId) {
+      axios.delete(baseUrl + '/api/list/delete', { params: { id: removedId } })
+        .then(response => {
+          this.lists.splice(idx, 1)
+        })
+        .catch(error => console.log(error))
+    }
   }
 }
 </script>

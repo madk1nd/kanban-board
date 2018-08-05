@@ -1,15 +1,11 @@
 package ru.goodgame.backend.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.goodgame.backend.service.ListService;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -22,7 +18,7 @@ public class ListController {
         this.listService = listService;
     }
 
-    @PostMapping("/all")
+    @GetMapping("/all")
     @ResponseBody
     public ResponseEntity getAllLists(@RequestParam("userId") String userId) {
         return new ResponseEntity<>(listService.getAllLists(userId), HttpStatus.OK);
@@ -34,5 +30,13 @@ public class ListController {
         listService.deleteBy(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public ResponseEntity add(@RequestParam("ordinal") Integer ordinal,
+                              @RequestParam("title") String title) {
+        return new ResponseEntity<>(listService.add(ordinal, title), HttpStatus.OK);
+    }
+
 
 }
