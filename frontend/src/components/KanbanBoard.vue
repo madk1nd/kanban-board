@@ -11,12 +11,14 @@
       >
     </div>
     <div id="board">
-      <kanban-list v-for="(list, index) in lists"
-                   :key="list.id"
-                   :title="list.title"
-                   :num="list.number"
-                   @remove="del(index, list.id)"
-      ></kanban-list>
+      <draggable class="kanban-draggable-list" v-model="lists" :options="{group:'ordinal'}" @start="drag=true" @end="drag=false">
+        <kanban-list v-for="(list, index) in lists"
+                     :key="list.id"
+                     :title="list.title"
+                     :num="list.number"
+                     @remove="del(index, list.id)"
+        ></kanban-list>
+      </draggable>
     </div>
   </div>
 </template>
@@ -24,11 +26,12 @@
 <script>
 import KanbanList from '@/components/board/KanbanList'
 import axios from 'axios'
+import draggable from 'vuedraggable'
 
 const baseUrl = 'http://localhost:8888'
 
 export default {
-  components: { KanbanList },
+  components: { KanbanList, draggable },
   name: 'KanbanBoard',
   data () {
     return {
