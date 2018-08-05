@@ -1,7 +1,21 @@
 <template>
   <div id="kanban-board">
     <h1>Hello, {{ name }}</h1>
-    <div class="board-button-add" @click="create(lists)"><p>+</p></div>
+    <div class="board-add-container">
+      <div class="board-button-add" v-show="!clicked" @click="enterListName()">
+        <p>+</p>
+      </div>
+      <input
+        ref="inp"
+        type="text"
+        v-show="clicked"
+        @keyup.enter="create()"
+        @keyup.escape="onFocusLost()"
+        @focusout="onFocusLost()"
+        v-model="newList"
+        placeholder="Enter new list name..."
+      >
+    </div>
     <div id="board">
       <kanban-list v-for="(list, index) in lists"
                    :key="list.id"
@@ -26,6 +40,8 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App!',
       lists: [],
+      newList: '',
+      clicked: false,
       name: 'Sergey'
     }
   },
@@ -38,13 +54,23 @@ export default {
       .catch(error => console.log(error))
   },
   methods: {
+    onFocusLost: function () {
+      this.clicked = false
+      this.newList = ''
+    },
+    enterListName: function () {
+      this.clicked = true
+      this.$nextTick(() => this.$refs.inp.focus())
+    },
     create: function () {
       let max = Math.max(...this.lists.map(o => o.ordinal), 1) + 1
-      axios.post(baseUrl + '/api/list/add', {}, { params: { ordinal: max, title: 'new' } })
+      axios.post(baseUrl + '/api/list/add', {}, { params: { ordinal: max, title: this.newList } })
         .then(response => {
           this.lists.push(response.data)
         })
         .catch(error => console.log(error))
+      this.clicked = false
+      this.newList = ''
     },
     del: function (idx, removedId) {
       axios.delete(baseUrl + '/api/list/delete', { params: { id: removedId } })
@@ -84,6 +110,11 @@ export default {
   background-color: #000041;
   transform: translateY(2px);
 }
-p {
+.board-add-container {
+  height: 60px;
+  vertical-align: middle;
+}
+input {
+  margin-top: 20px;
 }
 </style>

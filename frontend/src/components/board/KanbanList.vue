@@ -1,5 +1,6 @@
 <template>
   <div class="kanban-list">
+    <h2 class="kanban-list-title">{{ title }}</h2>
     <div class="kanban-add-card">
       <input type="text" placeholder="Start typing..." v-model="newtask">
       <button class="list-button-add" @click="add(newtask)">add</button>
