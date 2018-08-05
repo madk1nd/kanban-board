@@ -1,48 +1,77 @@
 <template>
   <div id="kanban-board">
     <h1>Hello, {{ name }}</h1>
-    <div class="board-button-add" @click="create(lists)"><p>+</p></div>
+    <div class="board-add-container">
+      <div class="board-button-add" v-show="!clicked" @click="enterListName()">
+        <p>+</p>
+      </div>
+      <input ref="titleInput" type="text" v-show="clicked" @keyup.enter="create()"
+        @keyup.escape="onFocusLost()" @focusout="onFocusLost()" v-model="newList"
+        placeholder="Enter new list name..."
+      >
+    </div>
     <div id="board">
-      <kanban-list v-for="(list, index) in lists"
-                   :key="list.id"
-                   :title="list.title"
-                   :num="list.number"
-                   v-on:remove="lists.splice(index, 1)"
-      ></kanban-list>
+      <draggable class="kanban-draggable-list" v-model="lists" :options="{group:'ordinal'}" @start="drag=true" @end="onDragEnd">
+        <kanban-list v-for="(list, index) in lists"
+                     :key="list.id"
+                     :title="list.title"
+                     :num="list.number"
+                     @remove="del(index, list.id)"
+        ></kanban-list>
+      </draggable>
     </div>
   </div>
 </template>
 
 <script>
 import KanbanList from '@/components/board/KanbanList'
+import axios from 'axios'
+import draggable from 'vuedraggable'
+
+const baseUrl = ''
 
 export default {
-  components: { KanbanList },
+  components: { KanbanList, draggable },
   name: 'KanbanBoard',
-  methods: {
-    create: function () {
-      let id = ++this.counter
-      this.lists.push(
-        {
-          id: id,
-          number: id,
-          title: 'new'
-        }
-      )
-    }
-  },
   data () {
     return {
       msg: 'Welcome to Your Vue.js App!',
-      lists: [
-        {
-          id: 1,
-          number: 123,
-          title: 'hello'
-        }
-      ],
-      counter: 1,
+      lists: [],
+      newList: '',
+      clicked: false,
       name: 'Sergey'
+    }
+  },
+  created () {
+    axios
+      .get(baseUrl + '/api/list/all', { params: { userId: 'admin' } })
+      .then(response => { this.lists = response.data })
+      .catch(error => console.log(error))
+  },
+  methods: {
+    onDragEnd: function () {
+      this.drag = false
+    },
+    onFocusLost: function () {
+      this.clicked = false
+      this.newList = ''
+    },
+    enterListName: function () {
+      this.clicked = true
+      this.$nextTick(() => this.$refs.titleInput.focus())
+    },
+    create: function () {
+      let max = Math.max(...this.lists.map(list => list.ordinal), 1) + 1
+      axios.post(baseUrl + '/api/list/add', {}, { params: { ordinal: max, title: this.newList } })
+        .then(response => { this.lists.push(response.data) })
+        .catch(error => console.log(error))
+      this.clicked = false
+      this.newList = ''
+    },
+    del: function (idx, removedId) {
+      axios.delete(baseUrl + '/api/list/delete', { params: { id: removedId } })
+        .then(response => { this.lists.splice(idx, 1) })
+        .catch(error => console.log(error))
     }
   }
 }
@@ -75,6 +104,11 @@ export default {
   background-color: #000041;
   transform: translateY(2px);
 }
-p {
+.board-add-container {
+  height: 60px;
+  vertical-align: middle;
+}
+input {
+  margin-top: 20px;
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="kanban-list">
+    <h2 class="kanban-list-title">{{ title }}</h2>
     <div class="kanban-add-card">
       <input type="text" placeholder="Start typing..." v-model="newtask">
       <button class="list-button-add" @click="add(newtask)">add</button>
@@ -31,20 +32,19 @@ export default {
     add: function (newText) {
       if (newText === '') {
         alert('Please enter the text of the task')
-        return
+      } else {
+        this.tasks.push(
+          {
+            id: Math.random() * 1000000,
+            text: newText
+          }
+        )
+        this.newtask = ''
       }
-      this.tasks.push(
-        {
-          id: Math.random() * 1000000,
-          text: newText
-        }
-      )
-      this.newtask = ''
     }
   },
   data () {
     return {
-      counter: Math.random() * 1000000,
       newtask: '',
       tasks: [
         {
