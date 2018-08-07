@@ -23,7 +23,7 @@
 		<querydsl.version>4.2.1</querydsl.version>
 		<postgresql.version>42.2.2</postgresql.version>
 		<postgresql.driver.name>org.postgresql.Driver</postgresql.driver.name>
-		<postgresql.url>jdbc:postgresql://138.68.99.124:5432/kanban</postgresql.url>
+		<postgresql.url>jdbc:postgresql://localhost:5432/kanban</postgresql.url>
 		<postgresql.username>admin</postgresql.username>
 		<postgresql.password>admin</postgresql.password>
 		<lombok.version>1.18.2</lombok.version>

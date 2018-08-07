@@ -3,11 +3,13 @@ package ru.goodgame.backend.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.goodgame.backend.dto.KanbanList;
 import ru.goodgame.backend.service.ListService;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
-//@CrossOrigin
+@CrossOrigin
 @RestController
 @RequestMapping("/api/list")
 public class ListController {
@@ -36,6 +38,14 @@ public class ListController {
     public ResponseEntity add(@RequestParam("ordinal") Integer ordinal,
                               @RequestParam("title") String title) {
         return new ResponseEntity<>(listService.add(ordinal, title), HttpStatus.OK);
+    }
+
+    @PutMapping("/update")
+    @ResponseBody
+    public ResponseEntity update(@RequestBody List<KanbanList> kanbanLists) {
+        System.out.println(kanbanLists);
+        listService.udpate(kanbanLists);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

@@ -1,16 +1,20 @@
 package ru.goodgame.backend.dto;
 
 import com.querydsl.core.Tuple;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.goodgame.backend.QLists;
 
 import javax.annotation.Nonnull;
 
 @Data
+@AllArgsConstructor
 public class KanbanList {
-    @Nonnull private Integer id;
-    @Nonnull private Integer ordinal;
-    @Nonnull private String title;
+    private Integer id;
+    private Integer ordinal;
+    private String title;
+
+    public KanbanList() {}
 
     public static KanbanList from(Tuple tuple) {
         return new KanbanList(

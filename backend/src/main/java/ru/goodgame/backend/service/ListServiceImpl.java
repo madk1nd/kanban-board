@@ -30,4 +30,9 @@ public class ListServiceImpl implements ListService {
     public KanbanList add(Integer ordinal, String title) {
         return listRepository.add(ordinal, title);
     }
+
+    @Override
+    public void udpate(List<KanbanList> kanbanLists) {
+        listRepository.update(kanbanLists);
+    }
 }

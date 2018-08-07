@@ -53,4 +53,14 @@ public class ListRepositoryImpl implements ListRepository {
                 .map(KanbanList::from)
                 .findFirst().orElse(null);
     }
+
+    @Override
+    public void update(List<KanbanList> kanbanLists) {
+        QLists lists = QLists.lists;
+        kanbanLists.forEach(kanbanList ->
+                factory.update(lists)
+                        .set(lists.ordinal, kanbanList.getOrdinal())
+                        .where(lists.id.eq(kanbanList.getId()))
+                        .execute());
+    }
 }

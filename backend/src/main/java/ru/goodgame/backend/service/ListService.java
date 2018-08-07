@@ -8,4 +8,5 @@ public interface ListService {
     List<KanbanList> getAllLists(String userId);
     void deleteBy(Integer id);
     KanbanList add(Integer ordinal, String title);
+    void udpate(List<KanbanList> kanbanLists);
 }

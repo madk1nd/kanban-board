@@ -11,7 +11,9 @@
       >
     </div>
     <div id="board">
-      <draggable class="kanban-draggable-list" v-model="lists" :options="{group:'ordinal'}" @start="drag=true" @end="onDragEnd">
+      <draggable class="kanban-draggable-list"
+                 v-model="lists"
+                 @start="drag=true" @end="onDragEnd">
         <kanban-list v-for="(list, index) in lists"
                      :key="list.id"
                      :title="list.title"
@@ -28,7 +30,7 @@ import KanbanList from '@/components/board/KanbanList'
 import axios from 'axios'
 import draggable from 'vuedraggable'
 
-const baseUrl = ''
+const baseUrl = 'http://localhost:8888'
 
 export default {
   components: { KanbanList, draggable },
@@ -45,12 +47,25 @@ export default {
   created () {
     axios
       .get(baseUrl + '/api/list/all', { params: { userId: 'admin' } })
-      .then(response => { this.lists = response.data })
+      .then(response => { this.lists = response.data.sort((a, b) => a.ordinal - b.ordinal) })
       .catch(error => console.log(error))
   },
   methods: {
-    onDragEnd: function () {
+    onDragEnd: function (event) {
+      let asc = event.oldIndex < event.newIndex
+      let start = asc ? event.oldIndex : event.newIndex
+      let end = (asc ? event.newIndex : event.oldIndex) + 1
+      let ordinals = this.lists
+        .slice(start, end)
+        .map(o => o.ordinal)
+        .sort()
+      for (let i = start; i < end; i++) {
+        this.lists[i].ordinal = ordinals[i - start]
+      }
       this.drag = false
+      axios.put(baseUrl + '/api/list/update', this.lists.slice(start, end))
+        .then(response => console.log(response.status))
+        .catch(error => console.log(error))
     },
     onFocusLost: function () {
       this.clicked = false
