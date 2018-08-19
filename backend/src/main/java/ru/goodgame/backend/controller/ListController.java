@@ -9,7 +9,7 @@ import ru.goodgame.backend.service.ListService;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@CrossOrigin
+//@CrossOrigin
 @RestController
 @RequestMapping("/api/list")
 public class ListController {
