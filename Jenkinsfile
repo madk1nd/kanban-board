@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'atlassianlabs/docker-node-jdk-chrome-firefox'
-            args '-v /root/.m2:/root/.m2 -p 8888:8888'
+            args '-v /root/.m2:/root/.m2 -v /settings:/settings -p 8888:8888'
         }
     }
     stages {
