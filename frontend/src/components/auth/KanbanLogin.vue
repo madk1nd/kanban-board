@@ -2,7 +2,7 @@
   <div class="kanban-login">
     <form name='f' @submit.prevent="login">
       <div class="login-form-container">
-        <div class="form-header form-inner"><h1>Login</h1></div>
+        <div class="form-color form-inner"><h1>Login</h1></div>
         <div class="form-inner">
           <input class="login-input-field" type="text" placeholder="Enter Username" name="uname"
                  v-model="username" required><br>
@@ -20,7 +20,7 @@
           </div>
         </div>
 
-        <div class="form-inner form-footer">
+        <div class="form-inner form-color">
           <span class="psw"><a href="#">Forgot password?</a></span>
         </div>
         <div v-if="error" style="color: red;">{{ error }}</div>
@@ -52,10 +52,7 @@ export default {
 }
 </script>
 <style scoped>
-  .form-header {
-    background: #aaffaa !important;
-  }
-  .form-footer {
+  .form-color {
     background: #aaffaa !important;
   }
   .login-input-field {
