@@ -1,2 +1,12 @@
 jwt:
   secret: @jwt.secret@
+
+server:
+  port: 9999
+
+spring:
+  datasource:
+    url: @postgresql.url@
+    username: @postgresql.username@
+    password: @postgresql.password@
+    driverClassName: @postgresql.driver.name@
