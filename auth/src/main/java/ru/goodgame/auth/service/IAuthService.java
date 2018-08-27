@@ -1,5 +1,9 @@
 package ru.goodgame.auth.service;
 
+import ru.goodgame.auth.dto.TokenBundle;
+
+import javax.annotation.Nonnull;
+
 public interface IAuthService {
-    String getUser();
+    @Nonnull TokenBundle generateTokens(@Nonnull String username, @Nonnull String password);
 }

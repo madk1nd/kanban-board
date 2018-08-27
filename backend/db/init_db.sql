@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(100) not null,
   token JSONB
 );
+CREATE INDEX ON users (username);
 
 INSERT INTO users (username, password, token) VALUES ('admin', '12345', '{}');
 
