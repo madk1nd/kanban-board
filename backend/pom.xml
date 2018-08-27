@@ -33,14 +33,6 @@
 			<version>${querydsl.version}</version>
 		</dependency>
 
-		<!-- Lombok -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- Validation -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
