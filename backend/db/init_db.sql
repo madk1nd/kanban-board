@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE INDEX ON users (username);
 
-INSERT INTO users (username, password, token) VALUES ('admin', '12345', '{}');
+INSERT INTO users (username, password, token) VALUES ('admin', '$2a$10$O2M5bP4NUCxQ0xJmSXDEEOE9a40T08G5nTwu0ax21.valMcl66hQa', '{}');
 
 CREATE TABLE IF NOT EXISTS lists (
   id SERIAL not null primary key,
