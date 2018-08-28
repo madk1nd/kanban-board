@@ -5,6 +5,7 @@ import ru.goodgame.auth.model.User;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface IAuthRepository {
+public interface IUserRepository {
     @Nonnull Optional<User> findByUsername(@Nonnull String username);
+    void saveRefreshToken(@Nonnull User user);
 }

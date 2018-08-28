@@ -1,7 +1,6 @@
 package ru.goodgame.auth.service;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,11 +9,14 @@ import ru.goodgame.auth.dto.TokenBundle;
 import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.User;
-import ru.goodgame.auth.repository.IAuthRepository;
+import ru.goodgame.auth.repository.IUserRepository;
+import ru.goodgame.auth.repository.ITokenRepository;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AuthService implements IAuthService {
@@ -22,11 +24,13 @@ public class AuthService implements IAuthService {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Nonnull private final IAuthRepository repository;
+    @Nonnull private final IUserRepository userRepository;
+    @Nonnull private final ITokenRepository tokenRepository;
     @Nonnull private final BCryptPasswordEncoder encoder;
 
-    public AuthService(@Nonnull IAuthRepository repository, @Nonnull BCryptPasswordEncoder encoder) {
-        this.repository = repository;
+    public AuthService(@Nonnull IUserRepository userRepository, @Nonnull ITokenRepository tokenRepository, @Nonnull BCryptPasswordEncoder encoder) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
         this.encoder = encoder;
     }
 
@@ -34,7 +38,7 @@ public class AuthService implements IAuthService {
     @Nonnull
     public TokenBundle generateTokens(@Nonnull String username, @Nonnull String password) {
 
-        @Nonnull val user = repository.findByUsername(username)
+        @Nonnull val user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
 
         if (!encoder.matches(password, user.getPassword())) {
@@ -52,11 +56,32 @@ public class AuthService implements IAuthService {
         @Nonnull val accessToken = buildToken(user.getId(), accessTokenExpiredIn);
         @Nonnull val refreshToken = buildToken(user.getId(), currentTime.plus(60, ChronoUnit.DAYS));
 
+        List<String> tokens = tokenRepository.findByUserId(user.getId());
+        validate(tokens, user.getId());
+
+        tokenRepository.saveRefreshToken(user.getId(), refreshToken);
+
         return new TokenBundle(accessToken, refreshToken, accessTokenExpiredIn.toEpochMilli());
     }
 
+    private void validate(List<String> tokens, UUID userId) {
+        if (tokens.size() >= 9) {
+            tokenRepository.deleteAllBy(userId);
+        } else {
+            JwtParser jwtParser = Jwts.parser().setSigningKey(secret);
+            tokens.stream()
+                    .filter(token -> isTokenExpired(jwtParser, token))
+                    .forEach(tokenRepository::delete);
+        }
+    }
+
+    private boolean isTokenExpired(JwtParser jwtParser, String token) {
+        long expiresIn = Long.parseLong(jwtParser.parseClaimsJws(token).getBody().get("expiresIn").toString());
+        return (expiresIn - Instant.now().toEpochMilli()) <= 0;
+    }
+
     @Nonnull
-    private String buildToken(String userId, Instant time) {
+    private String buildToken(UUID userId, Instant time) {
         @Nonnull val claims = Jwts.claims();
         claims.put("userId", userId);
         claims.put("expiresIn", time.toEpochMilli());
