@@ -39,7 +39,7 @@ public class AuthService implements IAuthService {
     @Nonnull
     public TokenBundle generateTokens(@Nonnull String username, @Nonnull String password, String remoteHost) {
         @Nonnull val user = userRepository.findByUsername(username)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new UserNotFoundException("User with username=" + username + " not found"));
         checkPassword(password, user);
         return buildTokens(user, remoteHost);
     }
@@ -48,10 +48,10 @@ public class AuthService implements IAuthService {
     @Override
     public TokenBundle updateTokens(@Nonnull String token, @Nonnull String remoteAddr) {
         if (invalid(token)) {
-            throw new InvalidRefreshTokenException();
+            throw new InvalidRefreshTokenException("Invalid or expired refresh token");
         }
         User user = userRepository.findByUserId(userIdFrom(token))
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new UserNotFoundException("Refresh token owner not found"));
         return buildTokens(user, remoteAddr);
     }
 
@@ -76,7 +76,7 @@ public class AuthService implements IAuthService {
                 .hashString(password, StandardCharsets.UTF_8)
                 .toString();
         if (!encoder.matches(hash, user.getPassword())) {
-            throw new NotAuthorizedException();
+            throw new NotAuthorizedException("invalid password");
         }
     }
 
