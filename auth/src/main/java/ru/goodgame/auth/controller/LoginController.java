@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.goodgame.auth.service.IAuthService;
 
 import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class LoginController {
@@ -18,7 +19,7 @@ public class LoginController {
     }
 
     @PostMapping(path = "/auth/login", consumes = {"application/x-www-form-urlencoded"})
-    public ResponseEntity login(@Nonnull String username, @Nonnull String password) {
-        return new ResponseEntity<>(service.generateTokens(username, password), HttpStatus.OK);
+    public ResponseEntity login(@Nonnull String username, @Nonnull String password, HttpServletRequest request) {
+        return new ResponseEntity<>(service.generateTokens(username, password, request.getRemoteAddr()), HttpStatus.OK);
     }
 }

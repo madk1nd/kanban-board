@@ -10,12 +10,10 @@ import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.User;
 import ru.goodgame.auth.repository.IUserRepository;
-import ru.goodgame.auth.repository.ITokenRepository;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,18 +23,16 @@ public class AuthService implements IAuthService {
     private String secret;
 
     @Nonnull private final IUserRepository userRepository;
-    @Nonnull private final ITokenRepository tokenRepository;
     @Nonnull private final BCryptPasswordEncoder encoder;
 
-    public AuthService(@Nonnull IUserRepository userRepository, @Nonnull ITokenRepository tokenRepository, @Nonnull BCryptPasswordEncoder encoder) {
+    public AuthService(@Nonnull IUserRepository userRepository, @Nonnull BCryptPasswordEncoder encoder) {
         this.userRepository = userRepository;
-        this.tokenRepository = tokenRepository;
         this.encoder = encoder;
     }
 
     @Override
     @Nonnull
-    public TokenBundle generateTokens(@Nonnull String username, @Nonnull String password) {
+    public TokenBundle generateTokens(@Nonnull String username, @Nonnull String password, String remoteHost) {
 
         @Nonnull val user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
@@ -45,34 +41,24 @@ public class AuthService implements IAuthService {
             throw new NotAuthorizedException();
         }
 
-        return buildTokens(user);
+        return buildTokens(user, remoteHost);
     }
 
     @Nonnull
-    private TokenBundle buildTokens(@Nonnull User user) {
+    private TokenBundle buildTokens(@Nonnull User user, String remoteHost) {
         @Nonnull val currentTime = Instant.now();
 
         @Nonnull val accessTokenExpiredIn = currentTime.plus(30, ChronoUnit.MINUTES);
         @Nonnull val accessToken = buildToken(user.getId(), accessTokenExpiredIn);
         @Nonnull val refreshToken = buildToken(user.getId(), currentTime.plus(60, ChronoUnit.DAYS));
 
-        List<String> tokens = tokenRepository.findByUserId(user.getId());
-        validate(tokens, user.getId());
-
-        tokenRepository.saveRefreshToken(user.getId(), refreshToken);
+        if (user.getTokens().containsKey(remoteHost)) {
+            userRepository.updateRefreshToken(user, refreshToken, remoteHost);
+        } else {
+            userRepository.saveRefreshToken(user, refreshToken, remoteHost);
+        }
 
         return new TokenBundle(accessToken, refreshToken, accessTokenExpiredIn.toEpochMilli());
-    }
-
-    private void validate(List<String> tokens, UUID userId) {
-        if (tokens.size() >= 9) {
-            tokenRepository.deleteAllBy(userId);
-        } else {
-            JwtParser jwtParser = Jwts.parser().setSigningKey(secret);
-            tokens.stream()
-                    .filter(token -> isTokenExpired(jwtParser, token))
-                    .forEach(tokenRepository::delete);
-        }
     }
 
     private boolean isTokenExpired(JwtParser jwtParser, String token) {

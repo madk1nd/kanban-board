@@ -16,6 +16,7 @@ INSERT INTO users (username, password) VALUES ('admin', '$2a$10$O2M5bP4NUCxQ0xJm
 CREATE TABLE IF NOT EXISTS tokens (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID not null,
+  remote_ip VARCHAR(15) not null,
   token VARCHAR(255) not null,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );

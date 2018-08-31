@@ -10,7 +10,6 @@ import ru.goodgame.auth.dto.TokenBundle;
 import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.User;
-import ru.goodgame.auth.repository.ITokenRepository;
 import ru.goodgame.auth.repository.IUserRepository;
 
 import java.util.Optional;
@@ -40,15 +39,13 @@ public class AuthServiceTest {
         IUserRepository userRepository = mock(IUserRepository.class);
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
 
-        ITokenRepository tokenRepository = mock(ITokenRepository.class);
-
-        service = new AuthService(userRepository, tokenRepository, new BCryptPasswordEncoder());
+        service = new AuthService(userRepository, new BCryptPasswordEncoder());
         service.setSecret(secret);
     }
 
     @Test
     public void generateTokens() {
-        TokenBundle actual = service.generateTokens("user1", "password");
+        TokenBundle actual = service.generateTokens("user1", "password", "127.0.0.1");
 
         Jws<Claims> claims = Jwts.parser()
                 .setSigningKey(secret)
@@ -74,11 +71,11 @@ public class AuthServiceTest {
 
     @Test(expected = UserNotFoundException.class)
     public void generateTokens_userNotFound() {
-        service.generateTokens("wronUserName", "password");
+        service.generateTokens("wronUserName", "password", "127.0.0.1");
     }
 
     @Test(expected = NotAuthorizedException.class)
     public void generateTokens_passwordWrong() {
-        service.generateTokens("user1", "wrong_password");
+        service.generateTokens("user1", "wrong_password", "127.0.0.1");
     }
 }
