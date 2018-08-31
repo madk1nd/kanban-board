@@ -1,19 +1,17 @@
 package ru.goodgame.auth.repository;
 
-import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.sql.SQLQueryFactory;
-import org.postgresql.util.PGobject;
 import org.springframework.stereotype.Service;
 import ru.goodgame.auth.QTokens;
 import ru.goodgame.auth.QUsers;
+import ru.goodgame.auth.model.Token;
 import ru.goodgame.auth.model.User;
 
 import javax.annotation.Nonnull;
-import java.sql.SQLException;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class UserRepository implements IUserRepository {
@@ -43,12 +41,54 @@ public class UserRepository implements IUserRepository {
                         .where(USERS.username.eq(username))
                         .fetchOne()
         ).map(user -> {
-            Map<String, String> transform = factory//.select(TOKENS.remoteIp, TOKENS.token)
+            List<Token> tokens = factory
+                    .select(
+                            Projections.constructor(
+                                    Token.class,
+                                    TOKENS.id,
+                                    TOKENS.userId,
+                                    TOKENS.token,
+                                    TOKENS.remoteIp
+                            )
+                    )
                     .from(TOKENS)
                     .where(TOKENS.userId.eq(user.getId()))
-                    .transform(GroupBy.groupBy(TOKENS.remoteIp).as(TOKENS.token));
-            System.out.println(transform);
-            user.getTokens().putAll(transform);
+                    .fetch();
+            user.getTokens().addAll(tokens);
+            return user;
+        });
+    }
+
+    @Nonnull
+    @Override
+    public Optional<User> findByUserId(@Nonnull String userId) {
+        return Optional.ofNullable(
+                factory.select(
+                        Projections.constructor(
+                                User.class,
+                                USERS.id,
+                                USERS.username,
+                                USERS.password
+                        )
+                )
+                        .from(USERS)
+                        .where(USERS.id.eq(UUID.fromString(userId)))
+                        .fetchOne()
+        ).map(user -> {
+            List<Token> tokens = factory
+                    .select(
+                            Projections.constructor(
+                                    Token.class,
+                                    TOKENS.id,
+                                    TOKENS.userId,
+                                    TOKENS.token,
+                                    TOKENS.remoteIp
+                            )
+                    )
+                    .from(TOKENS)
+                    .where(TOKENS.userId.eq(user.getId()))
+                    .fetch();
+            user.getTokens().addAll(tokens);
             return user;
         });
     }
@@ -67,24 +107,6 @@ public class UserRepository implements IUserRepository {
                 .set(TOKENS.token, refreshToken)
                 .where(TOKENS.userId.eq(user.getId()).and(TOKENS.remoteIp.eq(remoteHost)))
                 .execute();
-    }
-
-    private Object updateTokenField(Map<String, String> tokens) {
-        PGobject json = new PGobject();
-        json.setType("json");
-        try {
-            json.setValue(
-                    tokens.entrySet().stream()
-                    .map(pair -> "\"" + pair.getKey() + "\": \"" + pair.getValue() + "\"")
-                    .collect(Collectors.joining(", ", "{", "}"))
-            );
-        } catch (SQLException e) {
-            // log
-            e.printStackTrace();
-        }
-        System.out.println(json);
-        return json;
-
     }
 
 }

@@ -10,7 +10,7 @@ public class User {
     private final UUID id;
     private final String username;
     private final String password;
-    private final Map<String, String> tokens = new HashMap<>();
+    private final List<Token> tokens = new ArrayList<>();
 
     public User(Object id, String username, String password) {
         this.id = UUID.fromString(id.toString());

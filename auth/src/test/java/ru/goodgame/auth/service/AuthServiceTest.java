@@ -34,7 +34,7 @@ public class AuthServiceTest {
         User user = mock(User.class);
         when(user.getId()).thenReturn(uuid);
         when(user.getUsername()).thenReturn("user1");
-        when(user.getPassword()).thenReturn("$2a$10$Kn60f33G7LyYShz/QEHJB.AMkY.rqg79CbrzPBz4YryaEEcv/h8TK");
+        when(user.getPassword()).thenReturn("$2a$10$M31vW1hurpGOBYOs6Z.Dk.iUuN9txYG9Oi0pDv9t36sZAzpF9MK1u");
 
         IUserRepository userRepository = mock(IUserRepository.class);
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
@@ -77,5 +77,11 @@ public class AuthServiceTest {
     @Test(expected = NotAuthorizedException.class)
     public void generateTokens_passwordWrong() {
         service.generateTokens("user1", "wrong_password", "127.0.0.1");
+    }
+
+    @Test
+    public void checkPassword() {
+        User user = new User(UUID.randomUUID(), "admin", "$2a$10$SY2YXk2TG9N9B0w9OTWWsua3lBSB.my/OMNJZWxIF36N3eyodOIlK");
+        service.checkPassword("12345", user);
     }
 }

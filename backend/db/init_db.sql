@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE INDEX ON users (username);
 
-INSERT INTO users (username, password) VALUES ('admin', '$2a$10$O2M5bP4NUCxQ0xJmSXDEEOE9a40T08G5nTwu0ax21.valMcl66hQa');
+INSERT INTO users (username, password) VALUES ('admin', '$2a$10$SY2YXk2TG9N9B0w9OTWWsua3lBSB.my/OMNJZWxIF36N3eyodOIlK');
 
 CREATE TABLE IF NOT EXISTS tokens (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
