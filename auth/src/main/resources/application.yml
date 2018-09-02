@@ -10,3 +10,6 @@ spring:
     username: @postgresql.username@
     password: @postgresql.password@
     driverClassName: @postgresql.driver.name@
+
+logging:
+  path: @logging.path@

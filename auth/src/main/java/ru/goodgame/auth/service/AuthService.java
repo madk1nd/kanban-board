@@ -1,6 +1,7 @@
 package ru.goodgame.auth.service;
 
 import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,10 +30,12 @@ public class AuthService implements IAuthService {
 
     @Nonnull private final IUserRepository userRepository;
     @Nonnull private final BCryptPasswordEncoder encoder;
+    @Nonnull private final JwtParser parser;
 
     public AuthService(@Nonnull IUserRepository userRepository, @Nonnull BCryptPasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.encoder = encoder;
+        this.parser = Jwts.parser();
     }
 
     @Override
@@ -56,14 +59,14 @@ public class AuthService implements IAuthService {
     }
 
     private String userIdFrom(String token) {
-        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+        Jws<Claims> claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
         return claimsJws.getBody().get("userId").toString();
     }
 
     private boolean invalid(String token) {
         Instant now = Instant.now();
         try {
-            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            Jws<Claims> claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
             return ((Long) claimsJws.getBody().get("expiresIn")) < now.toEpochMilli();
         } catch (JwtException e) {
             // log.error
@@ -94,9 +97,14 @@ public class AuthService implements IAuthService {
 
     private void updateRefreshToken(@Nonnull User user, String remoteHost, String refreshToken) {
 
+//        TODO: remove to another module or simple CronTab task with python
         user.getTokens().removeIf(token -> invalid(token.getToken()));
 
-        if (user.getTokens().stream().map(Token::getRemoteIp).anyMatch(ip -> ip.equals(remoteHost))) {
+        boolean tokenExist = user.getTokens().stream()
+                .map(Token::getRemoteIp)
+                .anyMatch(ip -> ip.equals(remoteHost));
+
+        if (tokenExist) {
             userRepository.updateRefreshToken(user, refreshToken, remoteHost);
         } else {
             userRepository.saveRefreshToken(user, refreshToken, remoteHost);

@@ -84,4 +84,12 @@ public class AuthServiceTest {
         User user = new User(UUID.randomUUID(), "admin", "$2a$10$SY2YXk2TG9N9B0w9OTWWsua3lBSB.my/OMNJZWxIF36N3eyodOIlK");
         service.checkPassword("12345", user);
     }
+
+    @Test
+    public void updateTokens() {
+    }
+
+    @Test
+    public void setSecret() {
+    }
 }

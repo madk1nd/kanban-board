@@ -40,13 +40,12 @@ export default {
   },
   methods: {
     login () {
-      console.log(this.username)
-      console.log(this.password)
-      if (this.username === 'admin' && this.password === 'admin') {
-        this.$router.replace(this.$route.query.redirect || '/board')
-      } else {
-        this.error = 'Login failed!'
-      }
+      const { username, password } = this
+      this.$store.dispatch('AUTHENTICATE', { username, password })
+        .then(() => { this.$router.push('/board') })
+        .catch(e => {
+          this.error = 'Login failed! ' + e.response.data
+        })
     }
   }
 }
