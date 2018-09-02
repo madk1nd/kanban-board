@@ -1,13 +1,11 @@
 package ru.goodgame.backend.service;
 
-import org.springframework.stereotype.Service;
 import ru.goodgame.backend.da.ListRepository;
 import ru.goodgame.backend.dto.KanbanList;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@Service
 public class ListServiceImpl implements ListService {
 
     @Nonnull private final ListRepository listRepository;

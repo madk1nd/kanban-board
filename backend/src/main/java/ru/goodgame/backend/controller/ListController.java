@@ -1,19 +1,19 @@
 package ru.goodgame.backend.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.goodgame.backend.dto.KanbanList;
-import ru.goodgame.backend.service.ListService;
-
-import javax.annotation.Nonnull;
-import java.util.List;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.bind.annotation.*;
+//import ru.goodgame.backend.dto.KanbanList;
+//import ru.goodgame.backend.service.ListService;
+//
+//import javax.annotation.Nonnull;
+//import java.util.List;
 
 //@CrossOrigin
-@RestController
-@RequestMapping("/api/list")
+//@RestController
+//@RequestMapping("/api/list")
 public class ListController {
-
+/*
     @Nonnull private final ListService listService;
 
     public ListController(@Nonnull ListService listService) {
@@ -47,6 +47,6 @@ public class ListController {
         listService.udpate(kanbanLists);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
+*/
 
 }

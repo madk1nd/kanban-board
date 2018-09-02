@@ -1,7 +1,6 @@
 package ru.goodgame.backend.da;
 
 import com.querydsl.sql.SQLQueryFactory;
-import org.springframework.stereotype.Component;
 import ru.goodgame.backend.QLists;
 import ru.goodgame.backend.dto.KanbanList;
 
@@ -10,7 +9,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@Component
 public class ListRepositoryImpl implements ListRepository {
 
     @Nonnull private final SQLQueryFactory factory;
