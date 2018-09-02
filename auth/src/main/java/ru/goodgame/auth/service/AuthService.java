@@ -23,6 +23,7 @@ import java.util.UUID;
 import static com.google.common.hash.Hashing.sha256;
 
 @Service
+@Slf4j
 public class AuthService implements IAuthService {
 
     @Value("${jwt.secret}")
@@ -53,29 +54,30 @@ public class AuthService implements IAuthService {
         if (invalid(token)) {
             throw new InvalidRefreshTokenException("Invalid or expired refresh token");
         }
-        User user = userRepository.findByUserId(userIdFrom(token))
+        @Nonnull val user = userRepository.findByUserId(userIdFrom(token))
                 .orElseThrow(() -> new UserNotFoundException("Refresh token owner not found"));
         return buildTokens(user, remoteAddr);
     }
 
-    private String userIdFrom(String token) {
-        Jws<Claims> claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
+    @Nonnull
+    String userIdFrom(@Nonnull String token) {
+        @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
         return claimsJws.getBody().get("userId").toString();
     }
 
-    private boolean invalid(String token) {
-        Instant now = Instant.now();
+    private boolean invalid(@Nonnull String token) {
+        @Nonnull val now = Instant.now();
         try {
-            Jws<Claims> claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
+            @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
             return ((Long) claimsJws.getBody().get("expiresIn")) < now.toEpochMilli();
         } catch (JwtException e) {
-            // log.error
+            log.error("Token invalid, cause :: {}", e.getMessage());
             return true;
         }
     }
 
-    void checkPassword(@Nonnull String password, User user) {
-        String hash = sha256()
+    void checkPassword(@Nonnull String password, @Nonnull User user) {
+        @Nonnull val hash = sha256()
                 .hashString(password, StandardCharsets.UTF_8)
                 .toString();
         if (!encoder.matches(hash, user.getPassword())) {
@@ -84,7 +86,7 @@ public class AuthService implements IAuthService {
     }
 
     @Nonnull
-    private TokenBundle buildTokens(@Nonnull User user, String remoteHost) {
+    private TokenBundle buildTokens(@Nonnull User user, @Nonnull String remoteHost) {
         @Nonnull val currentTime = Instant.now();
 
         @Nonnull val accessTokenExpiredIn = currentTime.plus(30, ChronoUnit.MINUTES);
@@ -95,7 +97,7 @@ public class AuthService implements IAuthService {
         return new TokenBundle(accessToken, refreshToken, accessTokenExpiredIn.toEpochMilli());
     }
 
-    private void updateRefreshToken(@Nonnull User user, String remoteHost, String refreshToken) {
+    private void updateRefreshToken(@Nonnull User user, @Nonnull String remoteHost, @Nonnull String refreshToken) {
 
 //        TODO: remove to another module or simple CronTab task with python
         user.getTokens().removeIf(token -> invalid(token.getToken()));
@@ -112,7 +114,7 @@ public class AuthService implements IAuthService {
     }
 
     @Nonnull
-    private String buildToken(UUID userId, Instant time) {
+    String buildToken(@Nonnull UUID userId, @Nonnull Instant time) {
         @Nonnull val claims = Jwts.claims();
         claims.put("userId", userId);
         claims.put("expiresIn", time.toEpochMilli());
@@ -124,7 +126,7 @@ public class AuthService implements IAuthService {
     }
 
     // only for testing purposes
-    void setSecret(String secret) {
+    void setSecret(@Nonnull String secret) {
         this.secret = secret;
     }
 }

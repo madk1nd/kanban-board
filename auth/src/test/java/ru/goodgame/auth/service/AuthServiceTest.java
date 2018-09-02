@@ -7,11 +7,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ru.goodgame.auth.dto.TokenBundle;
+import ru.goodgame.auth.exception.InvalidRefreshTokenException;
 import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.User;
 import ru.goodgame.auth.repository.IUserRepository;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +41,7 @@ public class AuthServiceTest {
 
         IUserRepository userRepository = mock(IUserRepository.class);
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
+        when(userRepository.findByUserId(uuid.toString())).thenReturn(Optional.of(user));
 
         service = new AuthService(userRepository, new BCryptPasswordEncoder());
         service.setSecret(secret);
@@ -79,6 +83,16 @@ public class AuthServiceTest {
         service.generateTokens("user1", "wrong_password", "127.0.0.1");
     }
 
+    @Test(expected = InvalidRefreshTokenException.class)
+    public void udpateTokens_tokenInvalid() {
+        service.updateTokens("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ.-xN_h82PHVTCMA9vdoHrcZxH-x5mb11y1537t3rGzcM", "127.0.0.1");
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void updateTokens_userNotFound() {
+        service.updateTokens(service.buildToken(UUID.randomUUID(), Instant.now().plus(5, ChronoUnit.MINUTES)), "127.0.0.1");
+    }
+
     @Test
     public void checkPassword() {
         User user = new User(UUID.randomUUID(), "admin", "$2a$10$SY2YXk2TG9N9B0w9OTWWsua3lBSB.my/OMNJZWxIF36N3eyodOIlK");
@@ -87,9 +101,23 @@ public class AuthServiceTest {
 
     @Test
     public void updateTokens() {
+        TokenBundle tokenBundle = service.generateTokens("user1", "password", "127.0.0.1");
+        TokenBundle actual = service.updateTokens(tokenBundle.getRefreshToken(), "127.0.0.1");
+
+        assertEquals(service.userIdFrom(tokenBundle.getAccessToken()), service.userIdFrom(actual.getAccessToken()));
+        assertEquals(service.userIdFrom(tokenBundle.getRefreshToken()), service.userIdFrom(actual.getRefreshToken()));
     }
 
     @Test
-    public void setSecret() {
+    public void userIdFrom() {
+        TokenBundle tokenBundle = service.generateTokens("user1", "password", "127.0.0.1");
+
+        String idFromAccessToken = service.userIdFrom(tokenBundle.getAccessToken());
+        String idFromRefreshToken =  service.userIdFrom(tokenBundle.getRefreshToken());
+
+        assertEquals(uuid, UUID.fromString(idFromAccessToken));
+        assertEquals(uuid, UUID.fromString(idFromRefreshToken));
     }
+
+
 }
