@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- use Spring default values -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--springProperty scope="context" name="springAppName" source="spring.application.name"/-->
+
+    <!-- You can override this to have a custom pattern -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <property name="FILE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/auth.log</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${LOG_PATH}/auth.%d{yyyy-MM-dd}.log</fileNamePattern>
+
+            <!-- keep 30 days' worth of history capped at 1GB total size -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+
+        </rollingPolicy>
+    </appender>
+
+    <logger name="ru.goodgame.auth" additivity="false">
+        <level value="DEBUG" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE" />
+    </root>
+
+</configuration>
