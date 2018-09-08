@@ -1,36 +1,36 @@
 package ru.goodgame.backend.service;
 
-import ru.goodgame.backend.da.ListRepository;
+import io.vertx.ext.mongo.MongoClient;
 import ru.goodgame.backend.dto.KanbanList;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListServiceImpl implements ListService {
 
-    @Nonnull private final ListRepository listRepository;
+    @Nonnull private final MongoClient client;
 
-    public ListServiceImpl(@Nonnull ListRepository listRepository) {
-        this.listRepository = listRepository;
+    public ListServiceImpl(@Nonnull MongoClient client) {
+        this.client = client;
     }
 
     @Override
     public List<KanbanList> getAllLists(String userId) {
-        return listRepository.getAllLists(userId);
+        return new ArrayList<>();
     }
 
     @Override
     public void deleteBy(Integer id) {
-        listRepository.deleteBy(id);
     }
 
     @Override
     public KanbanList add(Integer ordinal, String title) {
-        return listRepository.add(ordinal, title);
+        return null;
     }
 
     @Override
     public void udpate(List<KanbanList> kanbanLists) {
-        listRepository.update(kanbanLists);
+
     }
 }
