@@ -6,11 +6,13 @@ import io.jsonwebtoken.Jwts;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.CorsHandler;
 import lombok.val;
 import ru.goodgame.backend.service.ListService;
 import ru.goodgame.backend.service.ListServiceImpl;
@@ -21,6 +23,7 @@ import java.time.Instant;
 
 public class BackendApplication extends AbstractVerticle {
 
+//    TODO: move client to service classes (inject in constructor of service only config)
     private MongoClient client;
     private JwtParser parser = Jwts.parser();
     private String secret;
@@ -30,14 +33,24 @@ public class BackendApplication extends AbstractVerticle {
     public void start(Future<Void> startFuture) {
         JsonObject config = config();
         String path = config.getString("path_to_config");
+        System.out.println("test");
 
         listService = new ListServiceImpl(getClient());
 
         Router router = Router.router(vertx);
-        router.route().handler(routingContext -> {
-            String token = getToken(routingContext);
 
-//            TODO: enable JWT authorization
+//        TODO: remove on production
+        router.route().handler(CorsHandler.create(".*")
+                .allowedHeader("Content-Type")
+                .allowedMethod(HttpMethod.DELETE)
+                .allowedMethod(HttpMethod.PUT)
+                .allowedMethod(HttpMethod.POST)
+                .allowedMethod(HttpMethod.GET));
+
+        router.route().handler(routingContext -> {
+
+//            TODO: enable JWT authorization and move to AuthService
+//            String token = getToken(routingContext);
 //            if (invalid(token)) {
 //                routingContext.response()
 //                        .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
@@ -47,24 +60,19 @@ public class BackendApplication extends AbstractVerticle {
             System.out.println("authorize");
             routingContext.next();
         });
-        router.get("/test").handler(routingContext -> {
-            System.out.println(routingContext.request().params());
-            routingContext.response()
-                    .end("test");
-        });
 
-        router.get("/another").handler(routingContext -> {
-            System.out.println(routingContext.request().params());
-            routingContext.response()
-                    .end("another");
-        });
+        router.get("/api/list/all").handler(listService::getAllLists);
+        router.post("/api/list/add").handler(listService::add);
+        router.delete("/api/list/delete").handler(listService::delete);
+        router.put("/api/list/update").handler(listService::update);
 
         vertx.createHttpServer()
                 .requestHandler(router::accept)
-                .listen(8080, res -> startServer(startFuture, res));
+                .listen(8090, res -> startServer(startFuture, res));
     }
 
     private String getToken(RoutingContext routingContext) {
+//        TODO: substring method may produce NullPointerException
         return routingContext.request().getHeader("Authorization").substring(7);
     }
 
@@ -80,7 +88,7 @@ public class BackendApplication extends AbstractVerticle {
         if (client == null) {
             client = MongoClient
                     .createShared(vertx, new JsonObject()
-                            .put("db_name", "test")
+                            .put("db_name", "boards")
                     );
         }
         return client;

@@ -1,12 +1,12 @@
 package ru.goodgame.backend.service;
 
-import ru.goodgame.backend.dto.KanbanList;
+import io.vertx.ext.web.RoutingContext;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public interface ListService {
-    List<KanbanList> getAllLists(String userId);
-    void deleteBy(Integer id);
-    KanbanList add(Integer ordinal, String title);
-    void udpate(List<KanbanList> kanbanLists);
+    void getAllLists(@Nonnull RoutingContext ctx);
+    void delete(@Nonnull RoutingContext ctx);
+    void add(@Nonnull RoutingContext ctx);
+    void update(@Nonnull RoutingContext ctx);
 }
