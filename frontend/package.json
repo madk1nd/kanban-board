@@ -15,14 +15,19 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "bulma": "^0.7.1",
     "es6-promise": "^4.2.4",
     "qs": "^6.5.2",
     "vue": "^2.5.2",
+    "vue-material-design-icons": "^2.1.1",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.16.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
+    "@mdi/font": "^2.8.94",
+    "@mdi/js": "^2.8.94",
+    "@mdi/svg": "^2.8.94",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.2.1",

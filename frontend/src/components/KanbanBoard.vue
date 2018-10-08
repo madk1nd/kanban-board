@@ -1,5 +1,5 @@
 <template>
-  <div id="kanban-board">
+  <div class="kanban-board">
     <h1>Hello, {{ name }}</h1>
     <div class="board-add-container">
       <div class="board-button-add" v-show="!clicked" @click="enterListName()">
@@ -98,7 +98,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#kanban-board {
+.kanban-board {
   border: 1px solid red;
 }
 #board {

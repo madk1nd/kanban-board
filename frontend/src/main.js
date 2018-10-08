@@ -4,6 +4,8 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import { store } from './store'
+import './../node_modules/bulma/css/bulma.css'
+import 'vue-material-design-icons/styles.css'
 
 Vue.config.productionTip = false
 
