@@ -43,12 +43,8 @@
     </div>
     <div class="hero-body">
       <div class="container">
-        <h1 class="title">
-          Kanban Board
-        </h1>
-        <h2 class="subtitle">
-          Simple kanban flow
-        </h2>
+        <h1 class="title">Kanban Board</h1>
+        <h2 class="subtitle">Simple kanban flow</h2>
       </div>
     </div>
   </section>

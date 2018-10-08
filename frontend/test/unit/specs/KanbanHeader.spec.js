@@ -6,6 +6,6 @@ describe('KanbanHeader.vue', () => {
     const Constructor = Vue.extend(KanbanHeader)
     const vm = new Constructor().$mount()
     expect(vm.$el.querySelector('h2').textContent)
-      .to.equal('This is the header')
+      .to.equal('Simple kanban flow')
   })
 })

@@ -98,11 +98,6 @@ export default {
       }
     }
   }),
-  // computed: {
-  //   hasErrors () {
-  //     return !Object.keys(this.error).every(key => this.error[key].valid)
-  //   }
-  // },
   watch: {
     'username': 'validateUsername',
     'email': 'validateEmail',
@@ -144,6 +139,7 @@ export default {
       }
     },
     validateEmail (email) {
+      // eslint-disable-next-line
       let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       if (!re.test(email)) {
         this.error.email.message = 'Email address is invalid'

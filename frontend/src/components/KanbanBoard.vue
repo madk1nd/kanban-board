@@ -30,8 +30,6 @@ import KanbanList from '@/components/board/KanbanList'
 import axios from 'axios'
 import draggable from 'vuedraggable'
 
-const baseUrl = ''
-
 export default {
   components: { KanbanList, draggable },
   name: 'KanbanBoard',
@@ -48,7 +46,7 @@ export default {
   },
   created () {
     axios
-      .get(baseUrl + '/api/list/all', { params: { board: this.board_id } })
+      .get('/api/list/all', { params: { board: this.board_id } })
       .then(response => {
         this.lists = response.data[0].lists.sort((a, b) => a.ordinal - b.ordinal)
       })
@@ -67,7 +65,7 @@ export default {
         this.lists[i].ordinal = ordinals[i - start]
       }
       this.drag = false
-      axios.put(baseUrl + '/api/list/update', this.lists, { params: { board: this.board_id } })
+      axios.put('/api/list/update', this.lists, { params: { board: this.board_id } })
         .then(response => console.log(response.status))
         .catch(error => console.log(error))
     },
@@ -81,14 +79,14 @@ export default {
     },
     create: function () {
       let max = Math.max(...this.lists.map(list => list.ordinal), 1) + 1
-      axios.post(baseUrl + '/api/list/add', {}, { params: { board: this.board_id, ordinal: max, title: this.newList } })
+      axios.post('/api/list/add', {}, { params: { board: this.board_id, ordinal: max, title: this.newList } })
         .then(response => { this.lists.push(response.data) })
         .catch(error => console.log(error))
       this.clicked = false
       this.newList = ''
     },
     del: function (idx, removedId) {
-      axios.delete(baseUrl + '/api/list/delete', { params: { board: this.board_id, id: removedId } })
+      axios.delete('/api/list/delete', { params: { board: this.board_id, id: removedId } })
         .then(response => { this.lists.splice(idx, 1) })
         .catch(error => console.log(error))
     }
