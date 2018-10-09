@@ -27,13 +27,12 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
-button {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
+.radius-top {
+  -webkit-border-radius: 5px 5px 0 0;
+  -moz-border-radius: 5px 5px 0 0;
+  border-radius: 5px 5px 0 0;
 }
-button:hover {
-  background-color:  #f9cd0b;
-  border-color: black;
+.width-full {
+  width: 100%;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <section class="section">
-    <div class="container" style="max-width: 600px;">
-      <div class="card" style="-webkit-border-radius: 5px; -moz-border-radius: 5px;border-radius: 5px;">
-        <div class="card-header notification has-text-centered has-background-info">
+    <div class="container form">
+      <div class="card radius-top">
+        <div class="card-header radius-top notification has-text-centered has-background-info">
           <div class="container">
             <p class="title has-text-white">Create new account</p>
           </div>
@@ -15,10 +15,10 @@
                      v-model.lazy="username"
                      :class="{'is-danger': error.username.message, 'is-success': error.username.valid}"
                      autofocus>
-              <span class="icon is-left pad-bottom">
+              <span class="icon is-left bottom-pad">
                     <account-icon/>
               </span>
-              <span class="icon is-medium is-right pad-bottom">
+              <span class="icon is-medium is-right bottom-pad">
                 <check-icon class="has-text-primary" v-if="error.username.valid"/>
               </span>
             </div>
@@ -33,10 +33,10 @@
                 type="email"
                 placeholder="For example, fox.mulder@example.com"
                 v-model.lazy="email">
-              <span class="icon is-small is-left pad-bottom">
+              <span class="icon is-small is-left bottom-pad">
                 <email-icon/>
               </span>
-              <span class="icon is-medium is-right pad-bottom">
+              <span class="icon is-medium is-right bottom-pad">
                 <check-icon class="has-text-primary" v-if="error.email.valid"/>
               </span>
             </div>
@@ -50,18 +50,18 @@
                      type="password"
                      placeholder="For example, ********"
                      v-model.lazy="password">
-              <span class="icon is-large is-left pad-bottom">
+              <span class="icon is-large is-left bottom-pad">
                 <lock-icon/>
               </span>
-              <span class="icon is-medium is-right pad-bottom">
+              <span class="icon is-medium is-right bottom-pad">
                 <check-icon class="has-text-primary" v-if="error.password.valid"/>
               </span>
             </div>
             <p class="help is-danger has-text-left" v-if="error.password.message">{{ this.error.password.message }}</p>
           </div>
-          <div class="field" style="padding-top: 20px;">
+          <div class="field top-pad">
             <div class="control">
-              <button class="button is-info is-medium" style="width: 100%;" @click="register">Register</button>
+              <button class="button is-info is-medium width-full" @click="register">Register</button>
             </div>
           </div>
         </div>
@@ -110,10 +110,7 @@ export default {
       this.validateEmail(this.email)
       this.validatePassword(this.password)
       if (Object.keys(this.error).every(key => this.error[key].valid)) {
-        console.log('all fine')
-        this.$router.push('/')
-      } else {
-        console.log('we have errors in form')
+        this.$router.push({name: 'KanbanConfirmation', params: {email: this.email}})
       }
     },
     validateUsername (name) {
@@ -154,7 +151,13 @@ export default {
 </script>
 
 <style scoped>
-.pad-bottom {
-  padding-bottom: 5px;
+.bottom-pad {
+  padding-bottom: 7px;
+}
+.top-pad {
+  padding-top: 20px;
+}
+.form {
+  max-width: 600px;
 }
 </style>
