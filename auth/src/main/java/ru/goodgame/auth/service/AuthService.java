@@ -12,6 +12,7 @@ import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.Token;
 import ru.goodgame.auth.model.User;
+import ru.goodgame.auth.repository.ITokenRepository;
 import ru.goodgame.auth.repository.IUserRepository;
 
 import javax.annotation.Nonnull;
@@ -30,11 +31,13 @@ public class AuthService implements IAuthService {
     private String secret;
 
     @Nonnull private final IUserRepository userRepository;
+    @Nonnull private final ITokenRepository tokenRepository;
     @Nonnull private final BCryptPasswordEncoder encoder;
     @Nonnull private final JwtParser parser;
 
-    public AuthService(@Nonnull IUserRepository userRepository, @Nonnull BCryptPasswordEncoder encoder) {
+    public AuthService(@Nonnull IUserRepository userRepository, @Nonnull ITokenRepository tokenRepository, @Nonnull BCryptPasswordEncoder encoder) {
         this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
         this.encoder = encoder;
         this.parser = Jwts.parser();
     }
@@ -44,6 +47,7 @@ public class AuthService implements IAuthService {
     public TokenBundle generateTokens(@Nonnull String username, @Nonnull String password, String remoteHost) {
         @Nonnull val user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User with username=" + username + " not found"));
+        user.getTokens().addAll(tokenRepository.getUserTokens(user.getId()));
         checkPassword(password, user);
         return buildTokens(user, remoteHost);
     }
@@ -56,6 +60,7 @@ public class AuthService implements IAuthService {
         }
         @Nonnull val user = userRepository.findByUserId(userIdFrom(token))
                 .orElseThrow(() -> new UserNotFoundException("Refresh token owner not found"));
+        user.getTokens().addAll(tokenRepository.getUserTokens(user.getId()));
         return buildTokens(user, remoteAddr);
     }
 
@@ -107,9 +112,9 @@ public class AuthService implements IAuthService {
                 .anyMatch(ip -> ip.equals(remoteHost));
 
         if (tokenExist) {
-            userRepository.updateRefreshToken(user, refreshToken, remoteHost);
+            tokenRepository.updateRefreshToken(user, refreshToken, remoteHost);
         } else {
-            userRepository.saveRefreshToken(user, refreshToken, remoteHost);
+            tokenRepository.saveRefreshToken(user, refreshToken, remoteHost);
         }
     }
 

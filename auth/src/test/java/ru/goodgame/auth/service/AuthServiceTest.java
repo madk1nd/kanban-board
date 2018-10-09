@@ -11,6 +11,7 @@ import ru.goodgame.auth.exception.InvalidRefreshTokenException;
 import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.User;
+import ru.goodgame.auth.repository.ITokenRepository;
 import ru.goodgame.auth.repository.IUserRepository;
 
 import java.time.Instant;
@@ -43,7 +44,9 @@ public class AuthServiceTest {
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
         when(userRepository.findByUserId(uuid.toString())).thenReturn(Optional.of(user));
 
-        service = new AuthService(userRepository, new BCryptPasswordEncoder());
+        ITokenRepository tokenRepository = mock(ITokenRepository.class);
+
+        service = new AuthService(userRepository, tokenRepository, new BCryptPasswordEncoder());
         service.setSecret(secret);
     }
 
