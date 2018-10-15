@@ -14,8 +14,17 @@ public class AuthExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({UserNotFoundException.class, NotAuthorizedException.class})
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            NotAuthorizedException.class,
+            UserDisabledException.class
+    })
     public ResponseEntity authFailure(Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({WrongTokenException.class})
+    public ResponseEntity confirmationFailed(Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.PRECONDITION_FAILED);
     }
 }

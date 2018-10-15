@@ -9,20 +9,20 @@
         </div>
         <div class="card-content">
           <div class="field">
-            <label class="label has-text-left">Username</label>
+            <label class="label has-text-left">Name</label>
             <div class="control has-icons-left has-icons-right">
               <input class="input is-medium" type="text" placeholder="For example, Fox Mulder"
-                     v-model.lazy="username"
-                     :class="{'is-danger': error.username.message, 'is-success': error.username.valid}"
+                     v-model.lazy="name"
+                     :class="{'is-danger': error.name.message, 'is-success': error.name.valid}"
                      autofocus>
               <span class="icon is-left bottom-pad">
                     <account-icon/>
               </span>
               <span class="icon is-medium is-right bottom-pad">
-                <check-icon class="has-text-primary" v-if="error.username.valid"/>
+                <check-icon class="has-text-primary" v-if="error.name.valid"/>
               </span>
             </div>
-            <p class="help is-danger has-text-left" v-if="error.username.message">{{ this.error.username.message }}</p>
+            <p class="help is-danger has-text-left" v-if="error.name.message">{{ this.error.name.message }}</p>
           </div>
           <div class="field">
             <label class="label has-text-left">Email</label>
@@ -80,11 +80,11 @@ export default {
   name: 'KanbanRegistration',
   components: { CheckIcon, AccountIcon, LockIcon, EmailIcon },
   data: () => ({
-    username: '',
+    name: '',
     password: '',
     email: '',
     error: {
-      username: {
+      name: {
         message: '',
         valid: false
       },
@@ -99,27 +99,39 @@ export default {
     }
   }),
   watch: {
-    'username': 'validateUsername',
+    'name': 'validateName',
     'email': 'validateEmail',
     'password': 'validatePassword'
   },
   methods: {
     register () {
       console.log('Try to register user')
-      this.validateUsername(this.username)
+      this.validateName(this.name)
       this.validateEmail(this.email)
       this.validatePassword(this.password)
       if (Object.keys(this.error).every(key => this.error[key].valid)) {
-        this.$router.push({name: 'KanbanConfirmation', params: {email: this.email}})
+        this.$store.dispatch('IS_NOT_EXIST', this.email)
+          .then(isNotExist => {
+            if (isNotExist) {
+              const {name, password, email} = this
+              this.$store.dispatch('REGISTER', {name, password, email})
+                .then(response => {
+                  console.log('register')
+                  this.$router.push({name: 'KanbanConfirmation', params: {email: this.email}})
+                })
+                .catch(e => console.log(e))
+            }
+          })
+          .catch(e => console.log(e))
       }
     },
-    validateUsername (name) {
+    validateName (name) {
       if (name.length < 3 || name.length > 50) {
-        this.error.username.message = 'Username must be between 3 and 50'
-        this.error.username.valid = false
+        this.error.name.message = 'Name must be between 3 and 50'
+        this.error.name.valid = false
       } else {
-        this.error.username.message = ''
-        this.error.username.valid = true
+        this.error.name.message = ''
+        this.error.name.valid = true
       }
     },
     validatePassword (pass) {

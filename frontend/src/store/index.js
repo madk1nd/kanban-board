@@ -40,6 +40,22 @@ export const store = new Vuex.Store({
             reject(e)
           })
       })
+    },
+    REGISTER: (context, user) => {
+      console.log('in register')
+      return new Promise((resolve, reject) => {
+        axios.post('http://localhost:9999/register', qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+          .then(response => resolve())
+          .catch(e => reject(e))
+      })
+    },
+    IS_NOT_EXIST: (context, username) => {
+      console.log('inIs')
+      return new Promise((resolve, reject) => {
+        axios.get('http://localhost:9999/check', { params: {user: username} })
+          .then(response => resolve(response.data))
+          .catch(e => reject(e))
+      })
     }
   }
 })

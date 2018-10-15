@@ -30,7 +30,8 @@ public class UserRepository implements IUserRepository {
                                 User.class,
                                 USERS.id,
                                 USERS.username,
-                                USERS.password
+                                USERS.password,
+                                USERS.enabled
                         )
                 )
                         .from(USERS)
@@ -48,13 +49,30 @@ public class UserRepository implements IUserRepository {
                                 User.class,
                                 USERS.id,
                                 USERS.username,
-                                USERS.password
+                                USERS.password,
+                                USERS.enabled
                         )
                 )
                         .from(USERS)
                         .where(USERS.id.eq(UUID.fromString(userId)))
                         .fetchOne()
         );
+    }
+
+    @Override
+    public void persistUser(@Nonnull String email, @Nonnull String password, @Nonnull String name) {
+        factory.insert(USERS)
+                .columns(USERS.username, USERS.password, USERS.name)
+                .values(email, password, name)
+                .execute();
+    }
+
+    @Override
+    public void enableUser(@Nonnull String username) {
+        factory.update(USERS)
+                .set(USERS.enabled, true)
+                .where(USERS.username.eq(username))
+                .execute();
     }
 
 }
