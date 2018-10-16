@@ -60,9 +60,9 @@ public class RegistrationService implements IRegistrationService {
     @Override
     public void confirmRegistration(@Nonnull String token) {
         @Nonnull val username = validationRepository.getBy(token)
-                .orElseThrow(() -> new WrongTokenException("token not found"));
+                .orElseThrow(() -> new WrongTokenException("Token not found."));
         if (tokenBuilder.invalid(token))
-            throw new TokenExpiredException("token expired");
+            throw new TokenExpiredException("Token expired.");
         userRepository.enableUser(username);
         validationRepository.deleteBy(token);
     }

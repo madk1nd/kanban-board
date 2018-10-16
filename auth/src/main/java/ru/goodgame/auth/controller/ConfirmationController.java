@@ -18,8 +18,13 @@ public class ConfirmationController {
     }
 
     @GetMapping("/confirm")
-    public String greeting(@RequestParam("token") String token) {
-        registrationService.confirmRegistration(token);
+    public String greeting(@RequestParam("token") String token, Model model) {
+        try {
+            registrationService.confirmRegistration(token);
+            model.addAttribute("success", "Your registration is confirmed!");
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
         return "confirm";
     }
 }

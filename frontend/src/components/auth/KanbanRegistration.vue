@@ -105,7 +105,6 @@ export default {
   },
   methods: {
     register () {
-      console.log('Try to register user')
       this.validateName(this.name)
       this.validateEmail(this.email)
       this.validatePassword(this.password)
@@ -116,10 +115,12 @@ export default {
               const {name, password, email} = this
               this.$store.dispatch('REGISTER', {name, password, email})
                 .then(response => {
-                  console.log('register')
                   this.$router.push({name: 'KanbanConfirmation', params: {email: this.email}})
                 })
                 .catch(e => console.log(e))
+            } else {
+              this.error.email.message = 'Email already exist'
+              this.error.email.valid = false
             }
           })
           .catch(e => console.log(e))
