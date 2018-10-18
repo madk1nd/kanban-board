@@ -17,6 +17,7 @@
     "axios": "^0.18.0",
     "bulma": "^0.7.1",
     "es6-promise": "^4.2.4",
+    "moment": "^2.22.2",
     "qs": "^6.5.2",
     "vue": "^2.5.2",
     "vue-material-design-icons": "^2.1.1",

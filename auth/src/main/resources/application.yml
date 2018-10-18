@@ -27,4 +27,4 @@ email:
     url: @email.app.url@
 
 logging:
-  path: @logging.path@
+  path: ./logs

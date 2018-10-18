@@ -3,9 +3,6 @@ package ru.goodgame.backend.dto;
 import com.querydsl.core.Tuple;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.goodgame.backend.QLists;
-
-import javax.annotation.Nonnull;
 
 @Data
 @AllArgsConstructor

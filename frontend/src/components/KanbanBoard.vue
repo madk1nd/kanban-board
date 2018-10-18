@@ -66,7 +66,7 @@ export default {
       }
       this.drag = false
       axios.put('/api/list/update', this.lists, { params: { board: this.board_id } })
-        .then(response => console.log(response.status))
+        .then(response => response)
         .catch(error => console.log(error))
     },
     onFocusLost: function () {

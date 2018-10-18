@@ -5,9 +5,6 @@
       <header class="navbar">
         <div class="container">
           <div class="navbar-brand">
-            <!--<a class="navbar-item">-->
-              <!--<img src="https://bulma.io/images/bulma-type-white.png" alt="Logo">-->
-            <!--</a>-->
             <span class="navbar-burger burger" data-target="navbarMenuHeroC">
               <span></span>
               <span></span>
@@ -25,15 +22,9 @@
               <a class="navbar-item">
                 Documentation
               </a>
-              <span class="navbar-item">
-              <a class="button is-success is-inverted">
-                <span class="top">
-                  <github-icon/>
-                </span>
-                <!--<span class="icon">-->
-                  <!--<i class="fab fa-github"></i>-->
-                <!--</span>-->
-                <span>Download</span>
+              <span class="navbar-item" v-if="isAuthenticated" >
+              <a class="button is-success is-inverted" @click="logout">
+                <span>Logout</span>
               </a>
             </span>
             </div>
@@ -48,25 +39,32 @@
       </div>
     </div>
   </section>
-  <!--<div class="kanban-header footer has-background-white">-->
-    <!--<h2>This is the header</h2>-->
-  <!--</div>-->
 </template>
 
 <script>
-import GithubIcon from 'vue-material-design-icons/GithubFace.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'KanbanHeader',
-  components: { GithubIcon }
+  methods: {
+    logout () {
+      this.$store.dispatch('AUTH_LOGOUT')
+        .then(() => {
+          this.$router.push('/')
+        })
+    }
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated'])
+  }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.kanban-header {}
-.top {
-  padding-bottom:1px;
-  padding-right: 5px;
-}
+  .kanban-header {}
+  .top {
+    padding-bottom:1px;
+    padding-right: 5px;
+  }
 </style>

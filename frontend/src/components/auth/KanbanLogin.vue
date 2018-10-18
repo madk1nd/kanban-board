@@ -34,23 +34,24 @@
                 </label>
             </div>
           </div>
-            <div class="field">
-              <div class="control">
-                <button class="button is-info is-medium width-full" @click="login">Login</button>
-              </div>
+          <div class="field">
+            <div class="control">
+              <button class="button is-info is-medium width-full" @click="login">Login</button>
             </div>
           </div>
-        </div>
-        <div class="card-footer">
-          <nav class="breadcrumb has-bullet-separator is-centered width-full top-pad" aria-label="breadcrumbs">
-              <ul>
-                <li><router-link to="/register">Sign in</router-link></li>
-                <li><a href="#">Forgot password?</a></li>
-                <li><a href="#">Help</a></li>
-              </ul>
-          </nav>
+          <div class="notification" v-if="error">{{ this.error }}</div>
         </div>
       </div>
+      <div class="card-footer">
+        <nav class="breadcrumb has-bullet-separator is-centered width-full top-pad" aria-label="breadcrumbs">
+            <ul>
+              <li><router-link to="/register">Sign in</router-link></li>
+              <li><a href="#">Forgot password?</a></li>
+              <li><a href="#">Help</a></li>
+            </ul>
+        </nav>
+      </div>
+    </div>
   </section>
 </template>
 <script>
@@ -73,7 +74,7 @@ export default {
           this.$router.push('/board')
         })
         .catch(e => {
-          this.error = 'Login failed! ' + e.response.data
+          this.error = e.response.data
         })
     }
   }

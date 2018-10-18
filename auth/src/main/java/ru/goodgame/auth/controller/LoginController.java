@@ -30,7 +30,7 @@ public class LoginController {
     }
 
     @PostMapping(path = "/refresh")
-    public ResponseEntity login(@RequestBody String token, HttpServletRequest request) {
+    public ResponseEntity refresh(@RequestBody String token, HttpServletRequest request) {
         return new ResponseEntity<>(
                 service.updateTokens(token, request.getRemoteAddr()),
                 HttpStatus.OK

@@ -3,6 +3,7 @@ package ru.goodgame.backend;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -10,9 +11,11 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.web.ParsedHeaderValues;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import lombok.val;
 import ru.goodgame.backend.service.ListService;
 import ru.goodgame.backend.service.ListServiceImpl;
@@ -26,7 +29,7 @@ public class BackendApplication extends AbstractVerticle {
 //    TODO: move client to service classes (inject in constructor of service only config)
     private MongoClient client;
     private JwtParser parser = Jwts.parser();
-    private String secret;
+    private String secret = "F18718B98349C7D97AE3BE6717D02DAFD3AAEB38EB218D74F0F64DEAA6DC481A88A2DD058BC6EDD5888B78A54CACEA2F85C8C24161FA58D5386E450102F73F2A";
     private ListService listService;
 
     @Override
@@ -42,22 +45,23 @@ public class BackendApplication extends AbstractVerticle {
 //        TODO: remove on production
         router.route().handler(CorsHandler.create(".*")
                 .allowedHeader("Content-Type")
+                .allowedHeader("Authorization")
                 .allowedMethod(HttpMethod.DELETE)
                 .allowedMethod(HttpMethod.PUT)
                 .allowedMethod(HttpMethod.POST)
                 .allowedMethod(HttpMethod.GET));
 
+//        router.route("/*").handler(StaticHandler.create().setWebRoot("public"));
+
         router.route().handler(routingContext -> {
 
 //            TODO: enable JWT authorization and move to AuthService
-//            String token = getToken(routingContext);
-//            if (invalid(token)) {
-//                routingContext.response()
-//                        .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
-//                        .end();
-//            }
-
-            System.out.println("authorize");
+            String token = getToken(routingContext);
+            if (invalid(token)) {
+                routingContext.response()
+                        .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
+                        .end();
+            }
             routingContext.next();
         });
 

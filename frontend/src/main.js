@@ -10,7 +10,11 @@ import 'vue-material-design-icons/styles.css'
 
 Vue.config.productionTip = false
 
-axios.defaults.baseURL = ''
+const token = localStorage.getItem('user-token')
+if (token) {
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
+}
+axios.defaults.baseURL = 'http://localhost:8090'
 
 /* eslint-disable no-new */
 new Vue({
