@@ -1,0 +1,12 @@
+FROM madk1nd/kanban:stretch-mvn-node
+
+WORKDIR /root
+
+RUN mkdir -p /root/logs
+
+EXPOSE 8090
+
+ADD . .
+ADD config/dev.properties config/dev.properties
+
+CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar

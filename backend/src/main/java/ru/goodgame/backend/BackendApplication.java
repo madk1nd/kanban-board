@@ -54,15 +54,13 @@ public class BackendApplication extends AbstractVerticle {
 //        router.route("/*").handler(StaticHandler.create().setWebRoot("public"));
 
         router.route().handler(routingContext -> {
-
-//            TODO: enable JWT authorization and move to AuthService
-            String token = getToken(routingContext);
-            if (invalid(token)) {
+            if (tokenInvalid(routingContext)) {
                 routingContext.response()
                         .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
                         .end();
+            } else {
+                routingContext.next();
             }
-            routingContext.next();
         });
 
         router.get("/api/list/all").handler(listService::getAllLists);
@@ -75,9 +73,9 @@ public class BackendApplication extends AbstractVerticle {
                 .listen(8090, res -> startServer(startFuture, res));
     }
 
-    private String getToken(RoutingContext routingContext) {
-//        TODO: substring method may produce NullPointerException
-        return routingContext.request().getHeader("Authorization").substring(7);
+    private boolean tokenInvalid(RoutingContext routingContext) {
+        String authorization = routingContext.request().getHeader("Authorization");
+        return authorization == null || invalid(authorization.substring(7));
     }
 
     private void startServer(Future<Void> startFuture, AsyncResult<HttpServer> res) {
@@ -93,6 +91,7 @@ public class BackendApplication extends AbstractVerticle {
             client = MongoClient
                     .createShared(vertx, new JsonObject()
                             .put("db_name", "boards")
+                            .put("host", "192.168.88.218")
                     );
         }
         return client;

@@ -1,0 +1,21 @@
+version: "3.2"
+
+services:
+  back:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.back
+    ports:
+      - "8090:8090"
+  front:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.front
+    ports:
+      - "8080:8080"
+  auth:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.auth
+    ports:
+      - "9999:9999"

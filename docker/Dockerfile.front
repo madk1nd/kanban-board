@@ -1,0 +1,11 @@
+FROM madk1nd/kanban:stretch-mvn-node
+
+WORKDIR /root
+
+EXPOSE 8080
+
+ADD . .
+
+RUN cd frontend && npm install
+
+CMD cd frontend && npm run dev
