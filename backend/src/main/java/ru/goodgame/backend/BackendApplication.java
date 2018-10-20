@@ -88,11 +88,7 @@ public class BackendApplication extends AbstractVerticle {
 
     private MongoClient getClient() {
         if (client == null) {
-            client = MongoClient
-                    .createShared(vertx, new JsonObject()
-                            .put("db_name", "boards")
-                            .put("host", "192.168.88.218")
-                    );
+            client = MongoClient.createShared(vertx, config());
         }
         return client;
     }

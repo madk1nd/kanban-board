@@ -2,6 +2,8 @@ version: "3.2"
 
 services:
   back:
+    environment:
+    - VERTX_CONF=$VERTX_CONF
     build:
       context: .
       dockerfile: docker/Dockerfile.back
@@ -14,6 +16,8 @@ services:
     ports:
       - "8080:8080"
   auth:
+    environment:
+      - MAILPASS=$MAILPASS
     build:
       context: .
       dockerfile: docker/Dockerfile.auth

@@ -9,4 +9,4 @@ EXPOSE 8090
 ADD . .
 ADD config/dev.properties config/dev.properties
 
-CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar
+CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar -conf ${VERTX_CONF:-config/vertx.json}
