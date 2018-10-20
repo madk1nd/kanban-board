@@ -29,16 +29,15 @@ public class BackendApplication extends AbstractVerticle {
 //    TODO: move client to service classes (inject in constructor of service only config)
     private MongoClient client;
     private JwtParser parser = Jwts.parser();
-    private String secret = "F18718B98349C7D97AE3BE6717D02DAFD3AAEB38EB218D74F0F64DEAA6DC481A88A2DD058BC6EDD5888B78A54CACEA2F85C8C24161FA58D5386E450102F73F2A";
+    private String secret = "";
     private ListService listService;
 
     @Override
     public void start(Future<Void> startFuture) {
         JsonObject config = config();
-        String path = config.getString("path_to_config");
-        System.out.println("test");
+        secret = config.getString("jwt_secret");
 
-        listService = new ListServiceImpl(getClient());
+        listService = new ListServiceImpl(getClient(config));
 
         Router router = Router.router(vertx);
 
@@ -86,9 +85,9 @@ public class BackendApplication extends AbstractVerticle {
         }
     }
 
-    private MongoClient getClient() {
+    private MongoClient getClient(@Nonnull JsonObject config) {
         if (client == null) {
-            client = MongoClient.createShared(vertx, config());
+            client = MongoClient.createShared(vertx, config);
         }
         return client;
     }
