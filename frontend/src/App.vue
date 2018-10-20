@@ -24,7 +24,7 @@ export default {
         let time = localStorage.getItem('expired-in')
         if (time && moment(time, 'x') < moment().utc()) {
           let refresh = localStorage.getItem('refresh-token')
-          fetch('http://auth:9999/auth/refresh', {
+          fetch('http://138.68.99.124:9999/auth/refresh', {
             method: 'POST',
             body: refresh
           })
