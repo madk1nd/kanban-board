@@ -17,7 +17,7 @@ public class ConfirmationController {
         this.registrationService = registrationService;
     }
 
-    @GetMapping("/confirm")
+    @GetMapping("/auth/confirm")
     public String greeting(@RequestParam("token") String token, Model model) {
         try {
             registrationService.confirmRegistration(token);

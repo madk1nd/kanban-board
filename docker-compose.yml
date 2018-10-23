@@ -3,23 +3,21 @@ version: "3.2"
 services:
   back:
     environment:
-    - VERTX_CONF=$VERTX_CONF
+      - VERTX_CONF=$VERTX_CONF
+      - IS_DOCKER=yes
     build:
       context: .
       dockerfile: docker/Dockerfile.back
-    ports:
-      - "8090:8090"
-  front:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.front
-    ports:
-      - "8080:8080"
   auth:
     environment:
       - MAILPASS=$MAILPASS
     build:
       context: .
       dockerfile: docker/Dockerfile.auth
+  nginx:
+    image: nginx
+    restart: always
     ports:
-      - "9999:9999"
+      - "8888:80"
+    volumes:
+      - ./config/nginx/kanban.conf:/etc/nginx/nginx.conf

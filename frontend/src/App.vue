@@ -11,6 +11,7 @@ import KanbanHeader from '@/components/KanbanHeader'
 import KanbanFooter from '@/components/KanbanFooter'
 import axios from 'axios'
 import moment from 'moment'
+import {host, authUrl} from './main'
 
 export default {
   name: 'App',
@@ -24,7 +25,7 @@ export default {
         let time = localStorage.getItem('expired-in')
         if (time && moment(time, 'x') < moment().utc()) {
           let refresh = localStorage.getItem('refresh-token')
-          fetch('http://138.68.99.124:9999/auth/refresh', {
+          fetch(`http://${host}:${authUrl}/auth/refresh`, {
             method: 'POST',
             body: refresh
           })

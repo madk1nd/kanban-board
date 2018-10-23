@@ -23,7 +23,13 @@ public class GoogleMailSender implements IMailSender {
 
     @Override
     public void send(@Nonnull String address, @Nonnull String token) {
-        String url = confirmUrl + "/confirm?token=" + token;
+        // TODO: remove this after check
+        System.out.println(System.getProperty("IS_DOCKER"));
+        String isDocker = System.getProperty("IS_DOCKER");
+        String authPort = "9999";
+        if (isDocker != null && isDocker.equals("yes"))
+            authPort = "8888";
+        String url = confirmUrl + ":" + authPort + "/auth/confirm?token=" + token;
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = null;

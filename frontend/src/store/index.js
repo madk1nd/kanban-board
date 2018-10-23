@@ -4,6 +4,7 @@ import axios from 'axios'
 import 'es6-promise/auto'
 import qs from 'qs'
 import moment from 'moment'
+import {authUrl, host} from '../main'
 
 Vue.use(Vuex)
 
@@ -41,7 +42,7 @@ export const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         console.log(localStorage.getItem('expired-in'))
         commit('AUTH_REQUEST')
-        axios.post('http://138.68.99.124:9999/auth/login', qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+        axios.post(`http://${host}:${authUrl}/auth/login`, qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
           .then(response => {
             let accessToken = response.data.accessToken
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken
@@ -67,21 +68,21 @@ export const store = new Vuex.Store({
     },
     REGISTER: (context, user) => {
       return new Promise((resolve, reject) => {
-        axios.post('http://138.68.99.124:9999/register', qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+        axios.post(`http://${host}:${authUrl}/auth/register`, qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
           .then(response => resolve())
           .catch(e => reject(e))
       })
     },
     IS_NOT_EXIST: (context, username) => {
       return new Promise((resolve, reject) => {
-        axios.get('http://138.68.99.124:9999/check', { params: {user: username} })
+        axios.get(`http://${host}:${authUrl}/auth/check`, { params: {user: username} })
           .then(response => resolve(response.data))
           .catch(e => reject(e))
       })
     },
     UPDATE_TOKENS: (context, refreshToken) => {
       return new Promise((resolve, reject) => {
-        axios.post('http://138.68.99.124:9999/auth/refresh', refreshToken)
+        axios.post(`http://${host}:${authUrl}/auth/refresh`, refreshToken)
           .then(response => {
             resolve(response.data)
           })

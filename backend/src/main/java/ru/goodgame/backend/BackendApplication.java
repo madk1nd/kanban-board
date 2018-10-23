@@ -50,7 +50,7 @@ public class BackendApplication extends AbstractVerticle {
                 .allowedMethod(HttpMethod.POST)
                 .allowedMethod(HttpMethod.GET));
 
-//        router.route("/*").handler(StaticHandler.create().setWebRoot("public"));
+        router.route("/static/*").handler(StaticHandler.create().setWebRoot("public"));
 
         router.route().handler(routingContext -> {
             if (tokenInvalid(routingContext)) {

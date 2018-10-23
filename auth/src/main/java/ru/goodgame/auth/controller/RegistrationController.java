@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 
 @CrossOrigin
 @RestController
+@RequestMapping("/auth")
 public class RegistrationController {
 
     @Nonnull private final IRegistrationService registrationService;

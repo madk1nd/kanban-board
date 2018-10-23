@@ -14,7 +14,13 @@ const token = localStorage.getItem('user-token')
 if (token) {
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
 }
-axios.defaults.baseURL = 'http://localhost:8090'
+
+const mode = process.env.NODE_ENV || 'development'
+export const host = mode === 'production' ? '138.68.99.124' : 'localhost'
+export const backPort = mode === 'production' ? '8888' : '8090'
+export const authUrl = mode === 'production' ? '8888' : '9999'
+
+axios.defaults.baseURL = `http://${host}:${backPort}`
 
 /* eslint-disable no-new */
 new Vue({
