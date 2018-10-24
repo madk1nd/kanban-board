@@ -6,7 +6,7 @@ RUN mkdir -p /root/logs
 
 EXPOSE 8090
 
-ADD . .
-ADD config/dev.properties config/dev.properties
+ADD backend/target backend/target
+ADD config config
 
 CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar -conf ${VERTX_CONF:-config/vertx.json}

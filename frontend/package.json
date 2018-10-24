@@ -95,8 +95,7 @@
     "karma-webpack": "^2.0.2",
     "mocha": "^5.2.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">= 6.0.0",
     "npm": ">= 3.0.0"

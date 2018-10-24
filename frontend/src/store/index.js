@@ -40,8 +40,9 @@ export const store = new Vuex.Store({
   actions: {
     AUTHENTICATE: ({commit}, user) => {
       return new Promise((resolve, reject) => {
-        console.log(localStorage.getItem('expired-in'))
         commit('AUTH_REQUEST')
+        console.log(authUrl)
+        console.log(host)
         axios.post(`http://${host}:${authUrl}/auth/login`, qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
           .then(response => {
             let accessToken = response.data.accessToken
