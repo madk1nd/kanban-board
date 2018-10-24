@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.back
     volumes:
-      - ${VERTX_CONF}:/settings/vertx.json
+      - /settings/:/settings/
   auth:
     environment:
       - MAILPASS=$MAILPASS
