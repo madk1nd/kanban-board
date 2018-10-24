@@ -8,7 +8,7 @@ pipeline {
 		}
 		stage('Test') {
 			steps {
-				sh 'mvn test -P prod'
+				sh 'mvn surefire:test -P prod'
 			}
 		}
 		stage('Deploy') {
