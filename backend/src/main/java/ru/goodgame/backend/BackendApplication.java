@@ -11,10 +11,10 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.web.ParsedHeaderValues;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
+import io.vertx.ext.web.handler.FaviconHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import lombok.val;
 import ru.goodgame.backend.service.ListService;
@@ -50,6 +50,7 @@ public class BackendApplication extends AbstractVerticle {
                 .allowedMethod(HttpMethod.POST)
                 .allowedMethod(HttpMethod.GET));
 
+        router.route().handler(FaviconHandler.create());
         router.route("/static/*").handler(StaticHandler.create().setWebRoot("public"));
 
         router.route().handler(routingContext -> {
