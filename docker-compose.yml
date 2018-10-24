@@ -8,6 +8,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.back
+    volumes:
+      - ${VERTX_CONF}:/settings/vertx.json
   auth:
     environment:
       - MAILPASS=$MAILPASS
