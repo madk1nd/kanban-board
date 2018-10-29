@@ -9,4 +9,4 @@ EXPOSE 8090
 ADD backend/target backend/target
 ADD config config
 
-CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar -conf ${VERTX_CONF:-config/vertx.json}
+CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar -conf {\"path\":\"${VERTX_CONF}\"}

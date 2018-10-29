@@ -15,14 +15,13 @@ if (token) {
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
 }
 
-const mode = 'development'
-console.log(process.env.NODE_ENV)
-export const host = '138.68.99.124'
-export const backPort = '8888'
-export const authUrl = '8888'
-// export const host = mode === 'production' ? '138.68.99.124' : 'localhost'
-// export const backPort = mode === 'production' ? '8888' : '8090'
-// export const authUrl = mode === 'production' ? '8888' : '9999'
+// const mode = 'development'
+console.log(`host = ${process.env.HOST}`)
+console.log(`back port = ${process.env.BACK_PORT}`)
+console.log(`auth port = ${process.env.AUTH_PORT}`)
+export const host = process.env.HOST
+export const backPort = process.env.BACK_PORT
+export const authUrl = process.env.AUTH_PORT
 
 axios.defaults.baseURL = `http://${host}:${backPort}`
 

@@ -2,17 +2,16 @@ version: "3.2"
 
 services:
   back:
-    environment:
-      - VERTX_CONF=$VERTX_CONF
-      - IS_DOCKER=yes
+    env_file:
+      - /settings/prod.env
     build:
       context: .
       dockerfile: docker/Dockerfile.back
     volumes:
       - /settings/:/settings/
   auth:
-    environment:
-      - MAILPASS=$MAILPASS
+    env_file:
+      - /settings/prod.env
     build:
       context: .
       dockerfile: docker/Dockerfile.auth
