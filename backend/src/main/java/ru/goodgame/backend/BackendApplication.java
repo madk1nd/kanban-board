@@ -67,7 +67,6 @@ public class BackendApplication extends AbstractVerticle {
     public boolean initFields(@Nonnull JsonObject config) {
         secret = config.getString("jwt.secret");
         listService = new ListServiceImpl(getClient(config));
-        System.out.println("isDev = " + config.getBoolean("development"));
         return config.getBoolean("development");
     }
 
@@ -98,7 +97,6 @@ public class BackendApplication extends AbstractVerticle {
         Router router = Router.router(vertx);
 
         if (isDev) {
-            System.out.println("isDev = true");
             router.route().handler(CorsHandler.create(".*")
                     .allowedHeader("Content-Type")
                     .allowedHeader("Authorization")
@@ -107,7 +105,6 @@ public class BackendApplication extends AbstractVerticle {
                     .allowedMethod(HttpMethod.POST)
                     .allowedMethod(HttpMethod.GET));
         } else {
-            System.out.println("isDev = false");
             router.route().handler(FaviconHandler.create());
             router.route("/static/*").handler(StaticHandler.create().setWebRoot("public"));
         }

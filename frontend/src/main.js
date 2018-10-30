@@ -15,10 +15,6 @@ if (token) {
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
 }
 
-// const mode = 'development'
-console.log(`host = ${process.env.HOST}`)
-console.log(`back port = ${process.env.BACK_PORT}`)
-console.log(`auth port = ${process.env.AUTH_PORT}`)
 export const host = process.env.HOST
 export const backPort = process.env.BACK_PORT
 export const authUrl = process.env.AUTH_PORT
