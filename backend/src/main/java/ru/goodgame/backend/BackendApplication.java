@@ -17,6 +17,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.FaviconHandler;
 import io.vertx.ext.web.handler.StaticHandler;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.goodgame.backend.service.ListService;
 import ru.goodgame.backend.service.ListServiceImpl;
@@ -25,11 +26,11 @@ import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
-
+@Slf4j
 public class BackendApplication extends AbstractVerticle {
 
-//    TODO: move client to service classes (inject in constructor of service only config)
-    private MongoClient client;
+    private final static int BACKEND_PORT = 8090;
+
     private JwtParser parser = Jwts.parser();
     private String secret = "";
     private ListService listService;
@@ -45,28 +46,31 @@ public class BackendApplication extends AbstractVerticle {
     }
 
     public Void failure(Throwable throwable, Future<Void> future) {
-        System.out.println(throwable.getMessage());
+        log.info("Can't start backend application, cause :: {}", throwable.getMessage());
         future.fail("Can't start backend application");
         return null;
     }
 
-    public CompletableFuture<Void> startHttpServer(@Nonnull Router router) {
+    private CompletableFuture<Void> startHttpServer(@Nonnull Router router) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         vertx.createHttpServer()
                 .requestHandler(router::accept)
-                .listen(8090, ar -> {
+                .listen(BACKEND_PORT, ar -> {
                     if (ar.succeeded()) {
+                        log.info("Http server started on port :: {}", BACKEND_PORT);
                         future.complete(null);
                     } else {
-                        future.completeExceptionally(ar.cause());
+                        Throwable cause = ar.cause();
+                        log.error("Http server can't start, cause :: {}", cause.getMessage());
+                        future.completeExceptionally(cause);
                     }
                 });
         return future;
     }
 
-    public boolean initFields(@Nonnull JsonObject config) {
+    private boolean initFields(@Nonnull JsonObject config) {
         secret = config.getString("jwt.secret");
-        listService = new ListServiceImpl(getClient(config));
+        listService = new ListServiceImpl(MongoClient.createShared(vertx, config));
         return config.getBoolean("development");
     }
 
@@ -93,7 +97,7 @@ public class BackendApplication extends AbstractVerticle {
         return future;
     }
 
-    public Router buildRouter(boolean isDev) {
+    private Router buildRouter(boolean isDev) {
         Router router = Router.router(vertx);
 
         if (isDev) {
@@ -122,7 +126,7 @@ public class BackendApplication extends AbstractVerticle {
         if (tokenInvalid(routingContext)) {
             routingContext.response()
                     .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
-                    .end("test");
+                    .end();
         } else {
             routingContext.next();
         }
@@ -133,19 +137,13 @@ public class BackendApplication extends AbstractVerticle {
         return authorization == null || invalid(authorization.substring(7));
     }
 
-    private MongoClient getClient(@Nonnull JsonObject config) {
-        if (client == null) {
-            client = MongoClient.createShared(vertx, config);
-        }
-        return client;
-    }
-
     private boolean invalid(@Nonnull String token) {
         @Nonnull val now = Instant.now();
         try {
             @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
             return ((Long) claimsJws.getBody().get("expiresIn")) < now.toEpochMilli();
         } catch (JwtException e) {
+            log.warn("Token invalid :: {}", token);
             return true;
         }
     }
