@@ -13,7 +13,7 @@ pipeline {
 		}
 		stage('Deploy') {
 			when {
-				branch 'deploy'
+				branch 'master'
 			}
 			steps {
 				sh 'docker-compose up -d --build'
