@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Getting Started: Serving Web Content</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+	</head>
+	<body>
+		<section class="section">
+			<div class="container form">
+				<div class="card radius-top">
+					<div class="card-header radius-top notification has-text-centered"
+						 th:classappend="${error == null} ? has-background-info : has-background-danger">
+						<div class="container">
+							<p class="title has-text-white">Confirmation
+								<span th:if="${error != null}">failed!</span>
+								<span th:if="${error == null}">success!</span>
+							</p>
+						</div>
+					</div>
+					<div class="card-content">
+						<div class="notification has-text-centered">
+							<span th:text="${error}"></span>
+							<span th:if="${error != null}"><br>Please try to register one more time...</span>
+							<span th:if="${error == null}">Congratulations!<br></span>
+							<span th:text="${success}"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<style>
+			.radius-top {
+				-webkit-border-radius: 5px 5px 0 0;
+				-moz-border-radius: 5px 5px 0 0;
+				border-radius: 5px 5px 0 0;
+			}
+			.form {
+				max-width: 400px;
+				margin-top: 200px;
+			}
+		</style>
+	</body>
+</html>

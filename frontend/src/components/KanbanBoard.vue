@@ -1,5 +1,5 @@
 <template>
-  <div id="kanban-board">
+  <div class="kanban-board">
     <h1>Hello, {{ name }}</h1>
     <div class="board-add-container">
       <div class="board-button-add" v-show="!clicked" @click="enterListName()">
@@ -30,8 +30,6 @@ import KanbanList from '@/components/board/KanbanList'
 import axios from 'axios'
 import draggable from 'vuedraggable'
 
-const baseUrl = ''
-
 export default {
   components: { KanbanList, draggable },
   name: 'KanbanBoard',
@@ -41,13 +39,17 @@ export default {
       lists: [],
       newList: '',
       clicked: false,
-      name: 'Sergey'
+      name: 'Sergey',
+      // TODO: remove hardcoded value
+      board_id: '5bafe37fb23269aba17efe61'
     }
   },
   created () {
     axios
-      .get(baseUrl + '/api/list/all', { params: { userId: 'admin' } })
-      .then(response => { this.lists = response.data.sort((a, b) => a.ordinal - b.ordinal) })
+      .get('/api/list/all', { params: { board: this.board_id } })
+      .then(response => {
+        this.lists = response.data[0].lists.sort((a, b) => a.ordinal - b.ordinal)
+      })
       .catch(error => console.log(error))
   },
   methods: {
@@ -63,8 +65,8 @@ export default {
         this.lists[i].ordinal = ordinals[i - start]
       }
       this.drag = false
-      axios.put(baseUrl + '/api/list/update', this.lists.slice(start, end))
-        .then(response => console.log(response.status))
+      axios.put('/api/list/update', this.lists, { params: { board: this.board_id } })
+        .then(response => response)
         .catch(error => console.log(error))
     },
     onFocusLost: function () {
@@ -77,14 +79,14 @@ export default {
     },
     create: function () {
       let max = Math.max(...this.lists.map(list => list.ordinal), 1) + 1
-      axios.post(baseUrl + '/api/list/add', {}, { params: { ordinal: max, title: this.newList } })
+      axios.post('/api/list/add', {}, { params: { board: this.board_id, ordinal: max, title: this.newList } })
         .then(response => { this.lists.push(response.data) })
         .catch(error => console.log(error))
       this.clicked = false
       this.newList = ''
     },
     del: function (idx, removedId) {
-      axios.delete(baseUrl + '/api/list/delete', { params: { id: removedId } })
+      axios.delete('/api/list/delete', { params: { board: this.board_id, id: removedId } })
         .then(response => { this.lists.splice(idx, 1) })
         .catch(error => console.log(error))
     }
@@ -94,7 +96,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#kanban-board {
+.kanban-board {
   border: 1px solid red;
 }
 #board {

@@ -1,0 +1,11 @@
+FROM madk1nd/kanban:stretch-mvn-node
+
+WORKDIR /root
+
+RUN mkdir -p /root/logs
+
+EXPOSE 9999
+
+ADD auth/target target
+
+CMD java -jar target/auth-2.0.3.RELEASE.jar --spring.mail.password=$MAILPASS
