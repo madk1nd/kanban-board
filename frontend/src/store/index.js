@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import 'es6-promise/auto'
 import qs from 'qs'
+import moment from 'moment'
+import {authUrl, host} from '../main'
 
 Vue.use(Vuex)
 
@@ -24,20 +27,88 @@ export const store = new Vuex.Store({
     },
     AUTH_ERROR: (state) => {
       state.status = 'error'
+    },
+    AUTH_LOGOUT: (state) => {
+      state.token = ''
+    },
+    CLEAR_STORAGE: () => {
+      localStorage.removeItem('user-token')
+      localStorage.removeItem('refresh-token')
+      localStorage.removeItem('expired-in')
     }
   },
   actions: {
-    AUTHENTICATE: (context, user) => {
+    AUTHENTICATE: ({commit}, user) => {
       return new Promise((resolve, reject) => {
-        context.commit('AUTH_REQUEST')
-        axios.post('http://localhost:9999/auth/login', qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+        commit('AUTH_REQUEST')
+        console.log(authUrl)
+        console.log(host)
+        axios.post(`http://${host}:${authUrl}/auth/login`, qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
           .then(response => {
-            context.commit('AUTH_SUCCESS', response.data.accessToken)
+            let accessToken = response.data.accessToken
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken
+            commit('AUTH_SUCCESS', accessToken)
+            localStorage.setItem('user-token', accessToken) // store the token in localstorage
+            localStorage.setItem('refresh-token', response.data.refreshToken)
+            localStorage.setItem('expired-in', response.data.accessTokenExpiredIn)
             resolve()
           }).catch(e => {
-            context.commit('AUTH_ERROR')
+            commit('CLEAR_STORAGE')
+            commit('AUTH_ERROR')
             reject(e)
           })
+      })
+    },
+    AUTH_LOGOUT: ({commit}) => {
+      return new Promise((resolve, reject) => {
+        commit('CLEAR_STORAGE')
+        commit('AUTH_LOGOUT')
+        delete axios.defaults.headers.common['Authorization']
+        resolve()
+      })
+    },
+    REGISTER: (context, user) => {
+      return new Promise((resolve, reject) => {
+        axios.post(`http://${host}:${authUrl}/auth/register`, qs.stringify(user), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+          .then(response => resolve())
+          .catch(e => reject(e))
+      })
+    },
+    IS_NOT_EXIST: (context, username) => {
+      return new Promise((resolve, reject) => {
+        axios.get(`http://${host}:${authUrl}/auth/check`, { params: {user: username} })
+          .then(response => resolve(response.data))
+          .catch(e => reject(e))
+      })
+    },
+    UPDATE_TOKENS: (context, refreshToken) => {
+      return new Promise((resolve, reject) => {
+        axios.post(`http://${host}:${authUrl}/auth/refresh`, refreshToken)
+          .then(response => {
+            resolve(response.data)
+          })
+          .catch(e => reject(e))
+      })
+    },
+    TRY_TO_REFRESH: (context) => {
+      return new Promise((resolve, reject) => {
+        let time = localStorage.getItem('expired-in')
+        if (time && moment(time, 'x') < moment().utc()) {
+          let refresh = localStorage.getItem('refresh-token')
+          context.dispatch('UPDATE_TOKENS', refresh)
+            .then(data => {
+              let accessToken = data.accessToken
+              axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken
+              context.commit('AUTH_SUCCESS', accessToken)
+              localStorage.setItem('user-token', accessToken) // store the token in localstorage
+              localStorage.setItem('refresh-token', data.refreshToken)
+              localStorage.setItem('expired-in', data.accessTokenExpiredIn)
+              resolve()
+            })
+            .catch(e => reject(e))
+        } else {
+          resolve()
+        }
       })
     }
   }

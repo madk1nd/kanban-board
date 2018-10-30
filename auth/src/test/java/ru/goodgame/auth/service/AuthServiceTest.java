@@ -11,7 +11,10 @@ import ru.goodgame.auth.exception.InvalidRefreshTokenException;
 import ru.goodgame.auth.exception.NotAuthorizedException;
 import ru.goodgame.auth.exception.UserNotFoundException;
 import ru.goodgame.auth.model.User;
+import ru.goodgame.auth.repository.ITokenRepository;
 import ru.goodgame.auth.repository.IUserRepository;
+import ru.goodgame.auth.utils.ITokenBuilder;
+import ru.goodgame.auth.utils.JwtTokenBuilder;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -29,6 +32,7 @@ public class AuthServiceTest {
 
     private AuthService service;
     private UUID uuid;
+    private ITokenBuilder tokenBuilder;
 
     @Before
     public void init() {
@@ -38,13 +42,18 @@ public class AuthServiceTest {
         when(user.getId()).thenReturn(uuid);
         when(user.getUsername()).thenReturn("user1");
         when(user.getPassword()).thenReturn("$2a$10$M31vW1hurpGOBYOs6Z.Dk.iUuN9txYG9Oi0pDv9t36sZAzpF9MK1u");
+        when(user.getEnabled()).thenReturn(true);
 
         IUserRepository userRepository = mock(IUserRepository.class);
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
         when(userRepository.findByUserId(uuid.toString())).thenReturn(Optional.of(user));
 
-        service = new AuthService(userRepository, new BCryptPasswordEncoder());
-        service.setSecret(secret);
+        ITokenRepository tokenRepository = mock(ITokenRepository.class);
+        tokenBuilder = new JwtTokenBuilder();
+        ((JwtTokenBuilder) tokenBuilder).setSecret(secret);
+
+
+        service = new AuthService(userRepository, tokenRepository, new BCryptPasswordEncoder(), tokenBuilder);
     }
 
     @Test
@@ -90,12 +99,12 @@ public class AuthServiceTest {
 
     @Test(expected = UserNotFoundException.class)
     public void updateTokens_userNotFound() {
-        service.updateTokens(service.buildToken(UUID.randomUUID(), Instant.now().plus(5, ChronoUnit.MINUTES)), "127.0.0.1");
+        service.updateTokens(tokenBuilder.buildToken(UUID.randomUUID(), Instant.now().plus(5, ChronoUnit.MINUTES)), "127.0.0.1");
     }
 
     @Test
     public void checkPassword() {
-        User user = new User(UUID.randomUUID(), "admin", "$2a$10$SY2YXk2TG9N9B0w9OTWWsua3lBSB.my/OMNJZWxIF36N3eyodOIlK");
+        User user = new User(UUID.randomUUID(), "admin", "$2a$10$SY2YXk2TG9N9B0w9OTWWsua3lBSB.my/OMNJZWxIF36N3eyodOIlK", true);
         service.checkPassword("12345", user);
     }
 
@@ -104,16 +113,16 @@ public class AuthServiceTest {
         TokenBundle tokenBundle = service.generateTokens("user1", "password", "127.0.0.1");
         TokenBundle actual = service.updateTokens(tokenBundle.getRefreshToken(), "127.0.0.1");
 
-        assertEquals(service.userIdFrom(tokenBundle.getAccessToken()), service.userIdFrom(actual.getAccessToken()));
-        assertEquals(service.userIdFrom(tokenBundle.getRefreshToken()), service.userIdFrom(actual.getRefreshToken()));
+        assertEquals(tokenBuilder.getClaim(tokenBundle.getAccessToken(), "userId"), tokenBuilder.getClaim(actual.getAccessToken(), "userId"));
+        assertEquals(tokenBuilder.getClaim(tokenBundle.getRefreshToken(), "userId"), tokenBuilder.getClaim(actual.getRefreshToken(), "userId"));
     }
 
     @Test
     public void userIdFrom() {
         TokenBundle tokenBundle = service.generateTokens("user1", "password", "127.0.0.1");
 
-        String idFromAccessToken = service.userIdFrom(tokenBundle.getAccessToken());
-        String idFromRefreshToken =  service.userIdFrom(tokenBundle.getRefreshToken());
+        String idFromAccessToken = tokenBuilder.getClaim(tokenBundle.getAccessToken(), "userId");
+        String idFromRefreshToken =  tokenBuilder.getClaim(tokenBundle.getRefreshToken(), "userId");
 
         assertEquals(uuid, UUID.fromString(idFromAccessToken));
         assertEquals(uuid, UUID.fromString(idFromRefreshToken));

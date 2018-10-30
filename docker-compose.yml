@@ -1,0 +1,34 @@
+version: "3.2"
+
+services:
+  back:
+    env_file:
+      - /settings/prod.env
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.back
+    volumes:
+      - /settings/:/settings/
+    networks:
+      - kanban
+  auth:
+    env_file:
+      - /settings/prod.env
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.auth
+    networks:
+      - kanban
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - "8888:80"
+    volumes:
+      - ./config/nginx/kanban.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - kanban
+
+networks:
+  kanban:
+    driver: bridge

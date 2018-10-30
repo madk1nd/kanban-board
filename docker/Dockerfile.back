@@ -1,0 +1,12 @@
+FROM madk1nd/kanban:stretch-mvn-node
+
+WORKDIR /root
+
+RUN mkdir -p /root/logs
+
+EXPOSE 8090
+
+ADD backend/target backend/target
+ADD config config
+
+CMD java -jar backend/target/backend-0.0.1-SNAPSHOT-fat.jar -conf {\"path\":\"${VERTX_CONF}\"}

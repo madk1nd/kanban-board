@@ -10,6 +10,21 @@ spring:
     username: @postgresql.username@
     password: @postgresql.password@
     driverClassName: @postgresql.driver.name@
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kanbanflow.notification@gmail.com
+#    password: pass this as environment variable or command line params
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+email:
+  confirm:
+    url: @email.app.url@
 
 logging:
-  path: @logging.path@
+  path: ./logs

@@ -1,38 +1,94 @@
 package ru.goodgame.backend.service;
 
-import org.springframework.stereotype.Service;
-import ru.goodgame.backend.da.ListRepository;
-import ru.goodgame.backend.dto.KanbanList;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.web.RoutingContext;
+import lombok.val;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.UUID;
 
-@Service
 public class ListServiceImpl implements ListService {
 
-    @Nonnull private final ListRepository listRepository;
+    @Nonnull
+    private static final String BOARD_DB = "boards";
+    @Nonnull
+    private final MongoClient client;
 
-    public ListServiceImpl(@Nonnull ListRepository listRepository) {
-        this.listRepository = listRepository;
+    public ListServiceImpl(@Nonnull MongoClient client) {
+        this.client = client;
     }
 
     @Override
-    public List<KanbanList> getAllLists(String userId) {
-        return listRepository.getAllLists(userId);
+    public void getAllLists(@Nonnull RoutingContext ctx) {
+        @Nonnull val board = ctx.queryParams().get("board");
+        client.find(BOARD_DB, new JsonObject().put("_id", new JsonObject().put("$oid", board)), ar -> {
+            if (ar.succeeded()) {
+                ctx.response().end(Json.encodePrettily(ar.result()));
+            } else {
+                ctx.response().end(ar.cause().getMessage());
+            }
+        });
     }
 
     @Override
-    public void deleteBy(Integer id) {
-        listRepository.deleteBy(id);
+    public void add(@Nonnull RoutingContext ctx) {
+        @Nonnull val board = ctx.queryParams().get("board");
+        @Nonnull val ordinal = Integer.parseInt(ctx.queryParams().get("ordinal"));
+        @Nonnull val title = ctx.queryParams().get("title");
+        @Nonnull val listItem = new JsonObject()
+                .put("id", UUID.randomUUID().toString())
+                .put("ordinal", ordinal)
+                .put("title", title);
+        client.updateCollection(
+                BOARD_DB,
+                new JsonObject().put("_id", new JsonObject().put("$oid", board)),
+                new JsonObject().put("$push", new JsonObject().put("lists", listItem)),
+                ar -> {
+                    if (ar.succeeded()) {
+                        ctx.response().end(listItem.encodePrettily());
+                    } else {
+                        ctx.response().end(ar.cause().getMessage());
+                    }
+                }
+        );
     }
 
     @Override
-    public KanbanList add(Integer ordinal, String title) {
-        return listRepository.add(ordinal, title);
+    public void delete(@Nonnull RoutingContext ctx) {
+        @Nonnull val board = ctx.queryParams().get("board");
+        @Nonnull val listId = ctx.queryParams().get("id");
+        client.updateCollection(
+                BOARD_DB,
+                new JsonObject().put("_id", new JsonObject().put("$oid", board)),
+                new JsonObject().put("$pull", new JsonObject().put("lists",
+                        new JsonObject().put("id", listId))),
+                ar -> {
+                    if (ar.succeeded()) {
+                        ctx.response().end();
+                    } else {
+                        ctx.response().end(ar.cause().getMessage());
+                    }
+                }
+        );
     }
 
     @Override
-    public void udpate(List<KanbanList> kanbanLists) {
-        listRepository.update(kanbanLists);
+    public void update(@Nonnull RoutingContext ctx) {
+        @Nonnull val board = ctx.queryParams().get("board");
+        ctx.request().bodyHandler(buffer ->
+                client.updateCollection(
+                        BOARD_DB,
+                        new JsonObject().put("_id", new JsonObject().put("$oid", board)),
+                        new JsonObject().put("$set", new JsonObject().put("lists", buffer.toJsonArray())),
+                        ar -> {
+                            if (ar.succeeded()) {
+                                ctx.response().end();
+                            } else {
+                                ctx.response().end(ar.cause().getMessage());
+                            }
+                        }
+                ));
     }
 }
