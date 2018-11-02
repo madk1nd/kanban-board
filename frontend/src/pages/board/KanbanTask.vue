@@ -1,12 +1,8 @@
-<template>
-  <div class="kanban-task">
-    <div class="task-text">
-      {{ text }}
-    </div>
-    <div class="task-button-remove">
-      <button @click="$emit('remove')">X</button>
-    </div>
-  </div>
+<template lang="pug">
+  .kanban-task
+    .task-text {{ text }}
+    .task-button-remove
+      button(@click="$emit('remove')") X
 </template>
 
 <script>

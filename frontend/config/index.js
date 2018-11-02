@@ -74,3 +74,8 @@ module.exports = {
     bundleAnalyzerReport: process.env.npm_config_report
   }
 }
+
+module.rules = {
+  test: /\.pug$/,
+  loader: 'pug-plain-loader'
+}
