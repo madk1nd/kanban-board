@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Login from '@/components/auth/KanbanLogin'
-import KanbanBoard from '@/components/KanbanBoard'
-import KanbanRegistration from '@/components/auth/KanbanRegistration'
-import KanbanConfirmation from '@/components/auth/KanbanConfirmation'
+import Login from '@/pages/auth/KanbanLogin'
+import KanbanBoard from '@/pages/KanbanBoard'
+import KanbanRegistration from '@/pages/auth/KanbanRegistration'
+import KanbanConfirmation from '@/pages/auth/KanbanConfirmation'
 import {store} from '@/store'
 
 Vue.use(Router)

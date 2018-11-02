@@ -93,7 +93,9 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.31",
     "karma-webpack": "^2.0.2",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "pug": "^2.0.3",
+    "pug-plain-loader": "^1.0.0"
   },
   "devDependencies": {},
   "engines": {

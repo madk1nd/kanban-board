@@ -1,24 +1,26 @@
-<template>
-  <div class="kanban-list">
-    <h2 class="kanban-list-title">{{ title }}</h2>
-    <div class="kanban-add-card">
-      <input type="text" placeholder="Start typing..." v-model="newtask">
-      <button class="list-button-add" @click="add(newtask)">add</button>
-    </div>
-    <draggable class="kanban-draggable-task" v-model="tasks" :options="{group:'id'}" @start="drag=true" @end="drag=false">
-      <kanban-task
+<template lang="pug">
+  .kanban-list
+    h2.kanban-list-title {{ title }}
+    .kanban-add-card
+      input(type="text" placeholder="Start typing..." v-model="newtask")
+      button.list-button-add(@click="add(newtask)") add
+    draggable.kanban-draggable-task(
+      v-model="tasks"
+      :options="{group:'id'}"
+      @start="drag=true"
+      @end="drag=false"
+    )
+      kanban-task(
         v-for="(task, index) in tasks"
         :key="task.id"
         :text="task.text"
-        v-on:remove="tasks.splice(index, 1)">
-      </kanban-task>
-    </draggable>
-    <button class="list-button-remove" @click="$emit('remove')">remove</button>
-  </div>
+        v-on:remove="tasks.splice(index, 1)"
+      )
+    button.list-button-remove(@click="$emit('remove')") remove
 </template>
 
 <script>
-import KanbanTask from '@/components/board/KanbanTask.vue'
+import KanbanTask from '@/pages/board/KanbanTask.vue'
 import draggable from 'vuedraggable'
 
 export default {

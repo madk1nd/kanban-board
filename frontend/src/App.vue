@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import KanbanHeader from '@/components/KanbanHeader'
-import KanbanFooter from '@/components/KanbanFooter'
+import KanbanHeader from '@/pages/KanbanHeader'
+import KanbanFooter from '@/pages/KanbanFooter'
 import axios from 'axios'
 import moment from 'moment'
 import {host, authUrl} from './main'

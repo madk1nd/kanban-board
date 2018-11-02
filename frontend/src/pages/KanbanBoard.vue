@@ -1,32 +1,36 @@
-<template>
-  <div class="kanban-board">
-    <h1>Hello, {{ name }}</h1>
-    <div class="board-add-container">
-      <div class="board-button-add" v-show="!clicked" @click="enterListName()">
-        <p>+</p>
-      </div>
-      <input ref="titleInput" type="text" v-show="clicked" @keyup.enter="create()"
-        @keyup.escape="onFocusLost()" @focusout="onFocusLost()" v-model="newList"
+<template lang="pug">
+  .kanban-board
+    h1 Hello, {{ name }}
+    .board-add-container
+      .board-button-add(v-show="!clicked" @click="enterListName()")
+        p +
+      input(
+        ref="titleInput"
+        type="text"
+        v-show="clicked"
+        @keyup.enter="create()"
+        @keyup.escape="onFocusLost()"
+        @focusout="onFocusLost()"
+        v-model="newList"
         placeholder="Enter new list name..."
-      >
-    </div>
-    <div id="board">
-      <draggable class="kanban-draggable-list"
-                 v-model="lists"
-                 @start="drag=true" @end="onDragEnd">
-        <kanban-list v-for="(list, index) in lists"
-                     :key="list.id"
-                     :title="list.title"
-                     :num="list.number"
-                     @remove="del(index, list.id)"
-        ></kanban-list>
-      </draggable>
-    </div>
-  </div>
+      )
+    .board
+      draggable.kanban-draggable-list(
+        v-model="lists"
+        @start="drag=true"
+        @end="onDragEnd"
+      )
+        kanban-list(
+          v-for="(list, index) in lists"
+          :key="list.id"
+          :title="list.title"
+          :num="list.number"
+          @remove="del(index, list.id)"
+        )
 </template>
 
 <script>
-import KanbanList from '@/components/board/KanbanList'
+import KanbanList from '@/pages/board/KanbanList'
 import axios from 'axios'
 import draggable from 'vuedraggable'
 
@@ -96,36 +100,29 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.kanban-board {
-  border: 1px solid red;
-}
-#board {
-  margin: 10px;
-  border: 1px solid blue;
-  overflow-x: auto;
-  white-space: nowrap;
-  text-align: left;
-}
-.board-button-add {
-  background-color: #aaffaa;
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  line-height: 60px;
-  margin: 0 auto;
-}
-.board-button-add:active {
-  background-color: #000041;
-  transform: translateY(2px);
-}
-.board-add-container {
-  height: 60px;
-  vertical-align: middle;
-}
-input {
-  margin-top: 20px;
-}
+  .kanban-board {
+    border: 1px solid red;
+  }
+  .board-button-add {
+    background-color: #aaffaa;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    line-height: 60px;
+    margin: 0 auto;
+  }
+  .board-button-add:active {
+    background-color: #000041;
+    transform: translateY(2px);
+  }
+  .board-add-container {
+    height: 60px;
+    vertical-align: middle;
+  }
+  input {
+    margin-top: 20px;
+  }
 </style>
