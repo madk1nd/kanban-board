@@ -26,6 +26,8 @@ import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
+import static ru.goodgame.backend.utils.Routes.*;
+
 @Slf4j
 public class BackendApplication extends AbstractVerticle {
 
@@ -113,11 +115,11 @@ public class BackendApplication extends AbstractVerticle {
             router.route("/static/*").handler(StaticHandler.create().setWebRoot("public"));
         }
 
-        router.route("/api/*").handler(this::checkToken);
-        router.get("/api/list/all").handler(listService::getAllLists);
-        router.post("/api/list/add").handler(listService::add);
-        router.delete("/api/list/delete").handler(listService::delete);
-        router.put("/api/list/update").handler(listService::update);
+        router.route(AUTH).handler(this::checkToken);
+        router.get(LIST_GET_ALL).handler(listService::getAllLists);
+        router.post(LIST_ADD).handler(listService::add);
+        router.delete(LIST_DELETE).handler(listService::delete);
+        router.put(LIST_UPDATE).handler(listService::update);
 
         return router;
     }
