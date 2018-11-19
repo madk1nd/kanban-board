@@ -11,10 +11,8 @@ import java.util.UUID;
 
 public class ListServiceImpl implements ListService {
 
-    @Nonnull
-    private static final String BOARD_DB = "boards";
-    @Nonnull
-    private final MongoClient client;
+    @Nonnull private static final String BOARD_DB = "boards";
+    @Nonnull private final MongoClient client;
 
     public ListServiceImpl(@Nonnull MongoClient client) {
         this.client = client;

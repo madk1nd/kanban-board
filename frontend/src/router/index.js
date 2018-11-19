@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/pages/auth/KanbanLogin'
-import KanbanBoard from '@/pages/KanbanBoard'
+import Board from '@/pages/Board'
+import Kanban from '@/pages/Kanban'
 import KanbanRegistration from '@/pages/auth/KanbanRegistration'
 import KanbanConfirmation from '@/pages/auth/KanbanConfirmation'
 import {store} from '@/store'
@@ -34,8 +35,15 @@ export default new Router({
     },
     {
       path: '/board',
-      name: 'KanbanBoard',
-      component: KanbanBoard,
+      name: 'Board',
+      component: Board,
+      beforeEnter: ifAuthenticated
+    },
+    {
+      path: '/kanban',
+      name: 'Kanban',
+      component: Kanban,
+      props: true,
       beforeEnter: ifAuthenticated
     },
     {

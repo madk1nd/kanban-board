@@ -19,10 +19,13 @@ import io.vertx.ext.web.handler.FaviconHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import ru.goodgame.backend.service.BoardServiceImpl;
+import ru.goodgame.backend.service.IBoardService;
 import ru.goodgame.backend.service.ListService;
 import ru.goodgame.backend.service.ListServiceImpl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,6 +39,7 @@ public class BackendApplication extends AbstractVerticle {
     private JwtParser parser = Jwts.parser();
     private String secret = "";
     private ListService listService;
+    private IBoardService boardService;
 
     @Override
     public void start(Future<Void> startFuture) {
@@ -72,7 +76,9 @@ public class BackendApplication extends AbstractVerticle {
 
     private boolean initFields(@Nonnull JsonObject config) {
         secret = config.getString("jwt.secret");
-        listService = new ListServiceImpl(MongoClient.createShared(vertx, config));
+        MongoClient shared = MongoClient.createShared(vertx, config);
+        listService = new ListServiceImpl(shared);
+        boardService = new BoardServiceImpl(shared);
         return config.getBoolean("development");
     }
 
@@ -116,6 +122,11 @@ public class BackendApplication extends AbstractVerticle {
         }
 
         router.route(AUTH).handler(this::checkToken);
+
+        router.get(BOARDS_ALL).handler(boardService::getAllBoards);
+        router.post(BOARDS_ADD).handler(boardService::addBoard);
+        router.delete(BOARDS_DELETE).handler(boardService::deleteBoard);
+
         router.get(LIST_GET_ALL).handler(listService::getAllLists);
         router.post(LIST_ADD).handler(listService::add);
         router.delete(LIST_DELETE).handler(listService::delete);
@@ -125,28 +136,31 @@ public class BackendApplication extends AbstractVerticle {
     }
 
     private void checkToken(@Nonnull RoutingContext routingContext) {
-        if (tokenInvalid(routingContext)) {
-            routingContext.response()
-                    .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
-                    .end();
+        @Nullable val authorization = routingContext.request().getHeader("Authorization");
+        if (authorization != null && authorization.length() > 7) {
+            @Nonnull val token = authorization.substring(7);
+            try {
+                @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
+                boolean expired = ((Long) claimsJws.getBody().get("expiresIn")) < Instant.now().toEpochMilli();
+                if (expired) {
+                    authFailed(routingContext);
+                } else {
+                    routingContext
+                            .put("userId", claimsJws.getBody().get("userId"))
+                            .next();
+                }
+            } catch (JwtException e) {
+                log.warn("Token invalid :: {}", token);
+                authFailed(routingContext);
+            }
         } else {
-            routingContext.next();
+            authFailed(routingContext);
         }
     }
 
-    private boolean tokenInvalid(RoutingContext routingContext) {
-        String authorization = routingContext.request().getHeader("Authorization");
-        return authorization == null || invalid(authorization.substring(7));
-    }
-
-    private boolean invalid(@Nonnull String token) {
-        @Nonnull val now = Instant.now();
-        try {
-            @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
-            return ((Long) claimsJws.getBody().get("expiresIn")) < now.toEpochMilli();
-        } catch (JwtException e) {
-            log.warn("Token invalid :: {}", token);
-            return true;
-        }
+    private void authFailed(RoutingContext routingContext) {
+        routingContext.response()
+                .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
+                .end();
     }
 }
