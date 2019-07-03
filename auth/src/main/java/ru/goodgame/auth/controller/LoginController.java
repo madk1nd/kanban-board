@@ -15,14 +15,14 @@ public class LoginController {
 
     @Nonnull private final IAuthService service;
 
-    public LoginController(@Nonnull IAuthService service) {
+    public LoginController(@Nonnull final IAuthService service) {
         this.service = service;
     }
 
     @PostMapping(path = "/login", consumes = {"application/x-www-form-urlencoded"})
-    public ResponseEntity login(@Nonnull String username,
-                                @Nonnull String password,
-                                HttpServletRequest request) {
+    public ResponseEntity login(@Nonnull final String username,
+                                @Nonnull final String password,
+                                @Nonnull final HttpServletRequest request) {
         return new ResponseEntity<>(
                 service.generateTokens(username, password, request.getRemoteAddr()),
                 HttpStatus.OK
@@ -30,7 +30,8 @@ public class LoginController {
     }
 
     @PostMapping(path = "/refresh")
-    public ResponseEntity refresh(@RequestBody String token, HttpServletRequest request) {
+    public ResponseEntity refresh(@Nonnull @RequestBody final String token,
+                                  @Nonnull final HttpServletRequest request) {
         return new ResponseEntity<>(
                 service.updateTokens(token, request.getRemoteAddr()),
                 HttpStatus.OK

@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.annotation.Nonnull;
+
 @ControllerAdvice
 public class AuthExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({InvalidRefreshTokenException.class})
-    public ResponseEntity invalidToken(Exception e) {
+    public ResponseEntity invalidToken(@Nonnull final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
@@ -19,12 +21,12 @@ public class AuthExceptionHandler extends ResponseEntityExceptionHandler {
             NotAuthorizedException.class,
             UserDisabledException.class
     })
-    public ResponseEntity authFailure(Exception e) {
+    public ResponseEntity authFailure(@Nonnull final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({WrongTokenException.class})
-    public ResponseEntity confirmationFailed(Exception e) {
+    public ResponseEntity confirmationFailed(@Nonnull final Exception e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.PRECONDITION_FAILED);
     }
 }

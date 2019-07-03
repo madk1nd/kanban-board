@@ -1,7 +1,9 @@
 package ru.goodgame.auth.exception;
 
+import javax.annotation.Nonnull;
+
 public class InvalidRefreshTokenException extends RuntimeException {
-    public InvalidRefreshTokenException(String s) {
+    public InvalidRefreshTokenException(@Nonnull final String s) {
         super(s);
     }
 }

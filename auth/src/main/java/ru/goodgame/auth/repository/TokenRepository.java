@@ -18,13 +18,13 @@ public class TokenRepository implements ITokenRepository {
 
     @Nonnull private final SQLQueryFactory factory;
 
-    public TokenRepository(@Nonnull SQLQueryFactory factory) {
+    public TokenRepository(@Nonnull final SQLQueryFactory factory) {
         this.factory = factory;
     }
 
     @Nonnull
     @Override
-    public List<Token> getUserTokens(@Nonnull UUID userId) {
+    public List<Token> getUserTokens(@Nonnull final UUID userId) {
         return factory.select(
                         Projections.constructor(
                                 Token.class,
@@ -40,7 +40,9 @@ public class TokenRepository implements ITokenRepository {
     }
 
     @Override
-    public void saveRefreshToken(@Nonnull User user, @Nonnull String refreshToken, @Nonnull String remoteHost) {
+    public void saveRefreshToken(@Nonnull final User user,
+                                 @Nonnull final String refreshToken,
+                                 @Nonnull final String remoteHost) {
         factory.insert(TOKENS)
                 .columns(TOKENS.userId, TOKENS.token, TOKENS.remoteIp)
                 .values(user.getId(), refreshToken, remoteHost)
@@ -48,10 +50,15 @@ public class TokenRepository implements ITokenRepository {
     }
 
     @Override
-    public void updateRefreshToken(@Nonnull User user, @Nonnull String refreshToken, @Nonnull String remoteHost) {
+    public void updateRefreshToken(@Nonnull final User user,
+                                   @Nonnull final String refreshToken,
+                                   @Nonnull final String remoteHost) {
         factory.update(TOKENS)
                 .set(TOKENS.token, refreshToken)
-                .where(TOKENS.userId.eq(user.getId()).and(TOKENS.remoteIp.eq(remoteHost)))
+                .where(
+                        TOKENS.userId.eq(user.getId())
+                                .and(TOKENS.remoteIp.eq(remoteHost))
+                )
                 .execute();
     }
 }

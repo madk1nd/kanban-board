@@ -17,13 +17,13 @@ public class UserRepository implements IUserRepository {
 
     @Nonnull private final SQLQueryFactory factory;
 
-    public UserRepository(@Nonnull SQLQueryFactory factory) {
+    public UserRepository(@Nonnull final SQLQueryFactory factory) {
         this.factory = factory;
     }
 
     @Nonnull
     @Override
-    public Optional<User> findByUsername(@Nonnull String username) {
+    public Optional<User> findByUsername(@Nonnull final String username) {
         return Optional.ofNullable(
                 factory.select(
                         Projections.constructor(
@@ -42,7 +42,7 @@ public class UserRepository implements IUserRepository {
 
     @Nonnull
     @Override
-    public Optional<User> findByUserId(@Nonnull String userId) {
+    public Optional<User> findByUserId(@Nonnull final String userId) {
         return Optional.ofNullable(
                 factory.select(
                         Projections.constructor(
@@ -60,7 +60,9 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public void persistUser(@Nonnull String email, @Nonnull String password, @Nonnull String name) {
+    public void persistUser(@Nonnull final String email,
+                            @Nonnull final String password,
+                            @Nonnull final String name) {
         factory.insert(USERS)
                 .columns(USERS.username, USERS.password, USERS.name)
                 .values(email, password, name)
@@ -68,7 +70,7 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public void enableUser(@Nonnull String username) {
+    public void enableUser(@Nonnull final String username) {
         factory.update(USERS)
                 .set(USERS.enabled, true)
                 .where(USERS.username.eq(username))
