@@ -2,6 +2,7 @@ package ru.goodgame.auth.model;
 
 import lombok.Data;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +15,10 @@ public class User {
     private final Boolean enabled;
     private final List<Token> tokens = new ArrayList<>();
 
-    public User(Object id, String username, String password, Boolean enabled) {
+    public User(@Nonnull final Object id,
+                @Nonnull final String username,
+                @Nonnull final String password,
+                @Nonnull final Boolean enabled) {
         this.id = UUID.fromString(id.toString());
         this.username = username;
         this.password = password;

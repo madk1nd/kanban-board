@@ -13,12 +13,13 @@ public class ConfirmationController {
 
     @Nonnull private final IRegistrationService registrationService;
 
-    public ConfirmationController(@Nonnull IRegistrationService registrationService) {
+    public ConfirmationController(@Nonnull final IRegistrationService registrationService) {
         this.registrationService = registrationService;
     }
 
     @GetMapping("/auth/confirm")
-    public String greeting(@RequestParam("token") String token, Model model) {
+    public String greeting(@Nonnull @RequestParam("token") final String token,
+                           @Nonnull final Model model) {
         try {
             registrationService.confirmRegistration(token);
             model.addAttribute("success", "Your registration is confirmed!");

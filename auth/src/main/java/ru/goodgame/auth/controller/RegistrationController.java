@@ -14,20 +14,20 @@ public class RegistrationController {
 
     @Nonnull private final IRegistrationService registrationService;
 
-    public RegistrationController(@Nonnull IRegistrationService registrationService) {
+    public RegistrationController(@Nonnull final IRegistrationService registrationService) {
         this.registrationService = registrationService;
     }
 
     @PostMapping(path = "/register", consumes = {"application/x-www-form-urlencoded"})
-    public ResponseEntity register(@Nonnull String email,
-                                   @Nonnull String password,
-                                   @Nonnull String name) {
+    public ResponseEntity register(@Nonnull final String email,
+                                   @Nonnull final String password,
+                                   @Nonnull final String name) {
         registrationService.registerUser(email, password, name);
         return new ResponseEntity<>("Ok", HttpStatus.OK);
     }
 
     @GetMapping("/check")
-    public ResponseEntity check(@Nonnull @RequestParam("user") String username) {
+    public ResponseEntity check(@Nonnull @RequestParam("user") final String username) {
         return new ResponseEntity<>(registrationService.checkUser(username), HttpStatus.OK);
     }
 

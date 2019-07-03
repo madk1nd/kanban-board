@@ -1,5 +1,5 @@
 <template lang="pug">
-  footer.footer.has-background-light.kanban-footer
+  footer.footer.has-background-light
     .content.has-text-centered
       p
         strong Kanban Board
@@ -18,11 +18,3 @@ export default {
   name: 'KanbanFooter'
 }
 </script>
-
-<style scoped>
-.kanban-footer {
-  position: absolute;
-  width: 100%;
-  bottom: 0;
-}
-</style>

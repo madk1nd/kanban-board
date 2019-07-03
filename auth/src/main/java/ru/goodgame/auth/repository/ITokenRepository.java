@@ -9,6 +9,10 @@ import java.util.UUID;
 
 public interface ITokenRepository {
     @Nonnull List<Token> getUserTokens(@Nonnull UUID userId);
-    void saveRefreshToken(@Nonnull User user, @Nonnull String refreshToken, @Nonnull String remoteHost);
-    void updateRefreshToken(@Nonnull User user, @Nonnull String refreshToken, @Nonnull String remoteHost);
+    void saveRefreshToken(@Nonnull User user,
+                          @Nonnull String refreshToken,
+                          @Nonnull String remoteHost);
+    void updateRefreshToken(@Nonnull User user,
+                            @Nonnull String refreshToken,
+                            @Nonnull String remoteHost);
 }

@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static com.google.common.hash.Hashing.sha256;
 
@@ -31,10 +32,10 @@ public class AuthService implements IAuthService {
     @Nonnull private final BCryptPasswordEncoder encoder;
     @Nonnull private final ITokenBuilder tokenBuilder;
 
-    public AuthService(@Nonnull IUserRepository userRepository,
-                       @Nonnull ITokenRepository tokenRepository,
-                       @Nonnull BCryptPasswordEncoder encoder,
-                       @Nonnull ITokenBuilder tokenBuilder) {
+    public AuthService(@Nonnull final IUserRepository userRepository,
+                       @Nonnull final ITokenRepository tokenRepository,
+                       @Nonnull final BCryptPasswordEncoder encoder,
+                       @Nonnull final ITokenBuilder tokenBuilder) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.encoder = encoder;
@@ -43,30 +44,51 @@ public class AuthService implements IAuthService {
 
     @Override
     @Nonnull
-    public TokenBundle generateTokens(@Nonnull String username, @Nonnull String password, String remoteHost) {
-        @Nonnull val user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User with username=" + username + " not found"));
+    public TokenBundle generateTokens(@Nonnull final String username,
+                                      @Nonnull final String password,
+                                      @Nonnull final String remoteHost) {
+        val user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(
+                        String.format("User with username=%s not found", username)
+                ));
+
         checkPassword(password, user);
-        if (!user.getEnabled()) throw new UserDisabledException("User account disabled");
-        user.getTokens().addAll(tokenRepository.getUserTokens(user.getId()));
+        if (!user.getEnabled()) {
+            throw new UserDisabledException("User account disabled");
+        }
+
+        val userTokens = tokenRepository.getUserTokens(user.getId());
+        user.getTokens().addAll(userTokens);
+
         return buildTokens(user, remoteHost);
     }
 
     @Nonnull
     @Override
-    public TokenBundle updateTokens(@Nonnull String token, @Nonnull String remoteAddr) {
+    public TokenBundle updateTokens(@Nonnull final String token,
+                                    @Nonnull final String remoteAddr) {
         if (tokenBuilder.invalid(token)) {
             throw new InvalidRefreshTokenException("Invalid or expired refresh token");
         }
-        @Nonnull val user = userRepository.findByUserId(tokenBuilder.getClaim(token, "userId"))
+
+        val user = userRepository.findByUserId(
+                tokenBuilder.getClaim(token, "userId")
+        )
                 .orElseThrow(() -> new UserNotFoundException("Refresh token owner not found"));
-        if (!user.getEnabled()) throw new UserDisabledException("User account disabled");
-        user.getTokens().addAll(tokenRepository.getUserTokens(user.getId()));
+
+        if (!user.getEnabled()) {
+            throw new UserDisabledException("User account disabled");
+        }
+
+        val userTokens = tokenRepository.getUserTokens(user.getId());
+        user.getTokens().addAll(userTokens);
+
         return buildTokens(user, remoteAddr);
     }
 
-    void checkPassword(@Nonnull String password, @Nonnull User user) {
-        @Nonnull val hash = sha256()
+    void checkPassword(@Nonnull final String password,
+                       @Nonnull final User user) {
+        val hash = sha256()
                 .hashString(password, StandardCharsets.UTF_8)
                 .toString();
         if (!encoder.matches(hash, user.getPassword())) {
@@ -75,23 +97,36 @@ public class AuthService implements IAuthService {
     }
 
     @Nonnull
-    private TokenBundle buildTokens(@Nonnull User user, @Nonnull String remoteHost) {
-        @Nonnull val currentTime = Instant.now();
+    private TokenBundle buildTokens(@Nonnull final User user,
+                                    @Nonnull final String remoteHost) {
+        val currentTime = Instant.now();
 
-        @Nonnull val accessTokenExpiredIn = currentTime.plus(30, ChronoUnit.MINUTES);
-        @Nonnull val accessToken = tokenBuilder.buildToken(user.getId(), accessTokenExpiredIn);
-        @Nonnull val refreshToken = tokenBuilder.buildToken(user.getId(), currentTime.plus(60, ChronoUnit.DAYS));
+        val accessTokenExpiredIn = currentTime.plus(30, ChronoUnit.MINUTES);
+        val accessToken = tokenBuilder.buildToken(
+                user.getId(),
+                accessTokenExpiredIn
+        );
+        val refreshToken = tokenBuilder.buildToken(
+                user.getId(),
+                currentTime.plus(60, ChronoUnit.DAYS)
+        );
         updateRefreshToken(user, remoteHost, refreshToken);
 
-        return new TokenBundle(accessToken, refreshToken, accessTokenExpiredIn.toEpochMilli());
+        return new TokenBundle(
+                accessToken,
+                refreshToken,
+                accessTokenExpiredIn.toEpochMilli()
+        );
     }
 
-    private void updateRefreshToken(@Nonnull User user, @Nonnull String remoteHost, @Nonnull String refreshToken) {
+    private void updateRefreshToken(@Nonnull final User user,
+                                    @Nonnull final String remoteHost,
+                                    @Nonnull final String refreshToken) {
 
 //        TODO: remove to another module or simple CronTab task with python
         user.getTokens().removeIf(token -> tokenBuilder.invalid(token.getToken()));
 
-        boolean tokenExist = user.getTokens().stream()
+        val tokenExist = user.getTokens().stream()
                 .map(Token::getRemoteIp)
                 .anyMatch(ip -> ip.equals(remoteHost));
 

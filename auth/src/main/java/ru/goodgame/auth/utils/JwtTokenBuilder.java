@@ -24,8 +24,10 @@ public class JwtTokenBuilder implements ITokenBuilder {
 
     @Nonnull
     @Override
-    public String buildToken(@Nonnull UUID userId, @Nonnull Instant time) {
-        @Nonnull val claims = Jwts.claims();
+    public String buildToken(@Nonnull final UUID userId,
+                             @Nonnull final Instant time) {
+        val claims = Jwts.claims();
+
         claims.put("userId", userId);
         claims.put("expiresIn", time.toEpochMilli());
 
@@ -36,10 +38,12 @@ public class JwtTokenBuilder implements ITokenBuilder {
     }
 
     @Override
-    public boolean invalid(@Nonnull String token) {
-        @Nonnull val now = Instant.now();
+    public boolean invalid(@Nonnull final String token) {
+        val now = Instant.now();
         try {
-            @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
+            val claimsJws = parser
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token);
             return ((Long) claimsJws.getBody().get("expiresIn")) < now.toEpochMilli();
         } catch (JwtException e) {
             log.error("Token invalid, cause :: {}", e.getMessage());
@@ -49,13 +53,18 @@ public class JwtTokenBuilder implements ITokenBuilder {
 
     @Nonnull
     @Override
-    public String getClaim(@Nonnull String token, @Nonnull String claimName) {
-        @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
-        return claimsJws.getBody().get(claimName).toString();
+    public String getClaim(@Nonnull final String token,
+                           @Nonnull final String claimName) {
+        return parser
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody()
+                .get(claimName)
+                .toString();
     }
 
     // Only for testing purposes
-    public void setSecret(String secret) {
+    public void setSecret(final String secret) {
         this.secret = secret;
     }
 }

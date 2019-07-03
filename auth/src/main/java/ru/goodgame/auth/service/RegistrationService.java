@@ -28,11 +28,11 @@ public class RegistrationService implements IRegistrationService {
     @Nonnull private final IMailSender mailSender;
     @Nonnull private final ITokenBuilder tokenBuilder;
 
-    public RegistrationService(@Nonnull IUserRepository userRepository,
-                               @Nonnull IValidationRepository validationRepository,
-                               @Nonnull BCryptPasswordEncoder encoder,
-                               @Nonnull IMailSender mailSender,
-                               @Nonnull ITokenBuilder tokenBuilder) {
+    public RegistrationService(@Nonnull final IUserRepository userRepository,
+                               @Nonnull final IValidationRepository validationRepository,
+                               @Nonnull final BCryptPasswordEncoder encoder,
+                               @Nonnull final IMailSender mailSender,
+                               @Nonnull final ITokenBuilder tokenBuilder) {
         this.userRepository = userRepository;
         this.validationRepository = validationRepository;
         this.encoder = encoder;
@@ -41,7 +41,9 @@ public class RegistrationService implements IRegistrationService {
     }
 
     @Override
-    public void registerUser(@Nonnull String email, @Nonnull String password, @Nonnull String name) {
+    public void registerUser(@Nonnull final String email,
+                             @Nonnull final String password,
+                             @Nonnull final String name) {
         CompletableFuture.runAsync(() -> {
             String encoded = encoder.encode(
                     sha256()
@@ -51,29 +53,32 @@ public class RegistrationService implements IRegistrationService {
             userRepository.persistUser(email, encoded, name);
         })
                 .thenRunAsync(() -> {
-                    String token = generateToken();
+                    val token = generateToken();
                     validationRepository.persistToken(token, email);
                     mailSender.send(email, token);
                 });
     }
 
     @Override
-    public void confirmRegistration(@Nonnull String token) {
-        @Nonnull val username = validationRepository.getBy(token)
+    public void confirmRegistration(@Nonnull final String token) {
+        val username = validationRepository.getBy(token)
                 .orElseThrow(() -> new WrongTokenException("Token not found."));
-        if (tokenBuilder.invalid(token))
+
+        if (tokenBuilder.invalid(token)) {
             throw new TokenExpiredException("Token expired.");
+        }
+
         userRepository.enableUser(username);
         validationRepository.deleteBy(token);
     }
 
     @Override
-    public boolean checkUser(@Nonnull String username) {
+    public boolean checkUser(@Nonnull final String username) {
         return !userRepository.findByUsername(username).isPresent();
     }
 
     private String generateToken() {
-        Instant expiresIn = Instant.now().plus(1, ChronoUnit.DAYS);
+        val expiresIn = Instant.now().plus(1, ChronoUnit.DAYS);
         return tokenBuilder.buildToken(UUID.randomUUID(), expiresIn);
     }
 }

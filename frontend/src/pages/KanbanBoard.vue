@@ -1,6 +1,7 @@
 <template lang="pug">
   .kanban-board
     h1 Hello, {{ name }}
+    h2 UserId {{ id }}
     .board-add-container
       .board-button-add(v-show="!clicked" @click="enterListName()")
         p +
@@ -33,6 +34,8 @@
 import KanbanList from '@/pages/board/KanbanList'
 import axios from 'axios'
 import draggable from 'vuedraggable'
+// eslint-disable-next-line
+import jwt_decode from 'jwt-decode'
 
 export default {
   components: { KanbanList, draggable },
@@ -55,6 +58,15 @@ export default {
         this.lists = response.data[0].lists.sort((a, b) => a.ordinal - b.ordinal)
       })
       .catch(error => console.log(error))
+  },
+  computed: {
+    id () {
+      let token = localStorage.getItem('user-token')
+      // eslint-disable-next-line
+      let data = jwt_decode(token)
+      console.log(data)
+      return 1
+    }
   },
   methods: {
     onDragEnd: function (event) {

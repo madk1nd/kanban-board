@@ -19,12 +19,22 @@ import io.vertx.ext.web.handler.FaviconHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import ru.goodgame.backend.service.BoardServiceImpl;
+import ru.goodgame.backend.service.IBoardService;
 import ru.goodgame.backend.service.ListService;
 import ru.goodgame.backend.service.ListServiceImpl;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
-import java.util.concurrent.CompletableFuture;
+
+import static ru.goodgame.backend.utils.Routes.AUTH;
+import static ru.goodgame.backend.utils.Routes.BOARDS_ADD;
+import static ru.goodgame.backend.utils.Routes.BOARDS_ALL;
+import static ru.goodgame.backend.utils.Routes.BOARDS_DELETE;
+import static ru.goodgame.backend.utils.Routes.LIST_ADD;
+import static ru.goodgame.backend.utils.Routes.LIST_DELETE;
+import static ru.goodgame.backend.utils.Routes.LIST_GET_ALL;
+import static ru.goodgame.backend.utils.Routes.LIST_UPDATE;
 
 @Slf4j
 public class BackendApplication extends AbstractVerticle {
@@ -34,74 +44,75 @@ public class BackendApplication extends AbstractVerticle {
     private JwtParser parser = Jwts.parser();
     private String secret = "";
     private ListService listService;
+    private IBoardService boardService;
 
     @Override
-    public void start(Future<Void> startFuture) {
+    public void start(final Future<Void> startFuture) {
         getConfig()
-                .thenApply(this::initFields)
-                .thenApply(this::buildRouter)
-                .thenAccept(this::startHttpServer)
-                .thenRun(startFuture::complete)
-                .exceptionally(throwable -> failure(throwable, startFuture));
+                .map(this::initFields)
+                .map(this::buildRouter)
+                .compose(this::startHttpServer)
+                .setHandler(startFuture);
     }
 
-    public Void failure(Throwable throwable, Future<Void> future) {
-        log.info("Can't start backend application, cause :: {}", throwable.getMessage());
-        future.fail("Can't start backend application");
-        return null;
-    }
-
-    private CompletableFuture<Void> startHttpServer(@Nonnull Router router) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
+    @Nonnull
+    private Future<Void> startHttpServer(@Nonnull final Router router) {
+        val future = Future.<Void>future();
         vertx.createHttpServer()
                 .requestHandler(router::accept)
                 .listen(BACKEND_PORT, ar -> {
                     if (ar.succeeded()) {
                         log.info("Http server started on port :: {}", BACKEND_PORT);
-                        future.complete(null);
+                        future.complete();
                     } else {
                         Throwable cause = ar.cause();
                         log.error("Http server can't start, cause :: {}", cause.getMessage());
-                        future.completeExceptionally(cause);
+                        future.fail(cause);
                     }
                 });
         return future;
     }
 
-    private boolean initFields(@Nonnull JsonObject config) {
+    private boolean initFields(@Nonnull final JsonObject config) {
         secret = config.getString("jwt.secret");
-        listService = new ListServiceImpl(MongoClient.createShared(vertx, config));
+        MongoClient shared = MongoClient.createShared(vertx, config);
+        listService = new ListServiceImpl(shared);
+        boardService = new BoardServiceImpl(shared);
         return config.getBoolean("development");
     }
 
-    public CompletableFuture<JsonObject> getConfig() {
-        @Nonnull CompletableFuture<JsonObject> future = new CompletableFuture<>();
+    @Nonnull
+    public Future<JsonObject> getConfig() {
+        val future = Future.<JsonObject>future();
 
-        @Nonnull val pathToConfig = config().getString("path", "../config/dev.properties");
-        @Nonnull val store = new ConfigStoreOptions()
+        val pathToConfig = config()
+                .getString("path", "../config/dev.properties");
+        val store = new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("properties")
                 .setConfig(new JsonObject().put("path", pathToConfig));
-        @Nonnull val retriever = ConfigRetriever.create(
+        val retriever = ConfigRetriever.create(
                 vertx,
-                new ConfigRetrieverOptions().addStore(store)
+                new ConfigRetrieverOptions()
+                        .addStore(store)
         );
 
         retriever.getConfig(ar -> {
             if (ar.succeeded()) {
                 future.complete(ar.result());
             } else {
-                future.completeExceptionally(new RuntimeException("Can't get Vertx config"));
+                future.fail(ar.cause());
             }
         });
         return future;
     }
 
     private Router buildRouter(boolean isDev) {
-        Router router = Router.router(vertx);
+        val router = Router.router(vertx);
 
         if (isDev) {
-            router.route().handler(CorsHandler.create(".*")
+            router.route()
+                    .handler(CorsHandler.create(".*")
                     .allowedHeader("Content-Type")
                     .allowedHeader("Authorization")
                     .allowedMethod(HttpMethod.DELETE)
@@ -110,41 +121,61 @@ public class BackendApplication extends AbstractVerticle {
                     .allowedMethod(HttpMethod.GET));
         } else {
             router.route().handler(FaviconHandler.create());
-            router.route("/static/*").handler(StaticHandler.create().setWebRoot("public"));
+            router.route("/static/*").handler(
+                    StaticHandler.create()
+                            .setWebRoot("public")
+            );
         }
 
-        router.route("/api/*").handler(this::checkToken);
-        router.get("/api/list/all").handler(listService::getAllLists);
-        router.post("/api/list/add").handler(listService::add);
-        router.delete("/api/list/delete").handler(listService::delete);
-        router.put("/api/list/update").handler(listService::update);
+        router.route(AUTH).handler(this::checkToken);
+
+        router.get(BOARDS_ALL).handler(boardService::getAllBoards);
+        router.post(BOARDS_ADD).handler(boardService::addBoard);
+        router.delete(BOARDS_DELETE).handler(boardService::deleteBoard);
+
+        router.get(LIST_GET_ALL).handler(listService::getAllLists);
+        router.post(LIST_ADD).handler(listService::add);
+        router.delete(LIST_DELETE).handler(listService::delete);
+        router.put(LIST_UPDATE).handler(listService::update);
 
         return router;
     }
 
-    private void checkToken(@Nonnull RoutingContext routingContext) {
-        if (tokenInvalid(routingContext)) {
-            routingContext.response()
-                    .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
-                    .end();
+    private void checkToken(@Nonnull final RoutingContext routingContext) {
+        val authorization = routingContext.request()
+                .getHeader("Authorization");
+        if (authorization != null && authorization.length() > 7) {
+            val token = authorization.substring(7);
+            try {
+                val claimsJws = parser
+                        .setSigningKey(secret)
+                        .parseClaimsJws(token);
+                val epochMilli = Instant.now().toEpochMilli();
+                val expiresIn = (Long) claimsJws.getBody().get("expiresIn");
+
+                if (expiresIn < epochMilli) {
+                    authFailed(routingContext);
+                } else {
+                    routingContext
+                            .put(
+                                    "userId",
+                                    claimsJws.getBody()
+                                            .get("userId")
+                            )
+                            .next();
+                }
+            } catch (JwtException e) {
+                log.warn("Token invalid :: {}", token);
+                authFailed(routingContext);
+            }
         } else {
-            routingContext.next();
+            authFailed(routingContext);
         }
     }
 
-    private boolean tokenInvalid(RoutingContext routingContext) {
-        String authorization = routingContext.request().getHeader("Authorization");
-        return authorization == null || invalid(authorization.substring(7));
-    }
-
-    private boolean invalid(@Nonnull String token) {
-        @Nonnull val now = Instant.now();
-        try {
-            @Nonnull val claimsJws = parser.setSigningKey(secret).parseClaimsJws(token);
-            return ((Long) claimsJws.getBody().get("expiresIn")) < now.toEpochMilli();
-        } catch (JwtException e) {
-            log.warn("Token invalid :: {}", token);
-            return true;
-        }
+    private void authFailed(@Nonnull final RoutingContext routingContext) {
+        routingContext.response()
+                .setStatusCode(HttpResponseStatus.UNAUTHORIZED.code())
+                .end();
     }
 }
