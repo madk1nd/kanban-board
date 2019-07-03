@@ -17,61 +17,93 @@ public class BoardServiceImpl implements IBoardService {
 
     @Nonnull private final MongoClient client;
 
-    public BoardServiceImpl(@Nonnull MongoClient client) {
+    public BoardServiceImpl(@Nonnull final MongoClient client) {
         this.client = client;
     }
 
     @Override
-    public void getAllBoards(@Nonnull RoutingContext ctx) {
-        @Nonnull val userId = ctx.get("userId");
-        @Nonnull val query = new JsonObject().put("_id", userId);
-        client.findOne(BOARDS, query, null,
+    public void getAllBoards(@Nonnull final RoutingContext ctx) {
+        val userId = ctx.get("userId");
+        val query = new JsonObject().put("_id", userId);
+        client.findOne(
+                BOARDS,
+                query,
+                null,
                 ar -> {
-                    if (ar.succeeded()) ctx.response().end(Json.encode(Board.fromJson(ar.result())));
-                    else ctx.response().end(ar.cause().getMessage());
+                    if (ar.succeeded()) {
+                        ctx.response()
+                                .end(Json.encode(
+                                        Board.fromJson(ar.result())
+                                ));
+                    }
+                    else {
+                        ctx.response()
+                                .end(ar.cause().getMessage());
+                    }
                 });
-
     }
 
     @Override
-    public void addBoard(@Nonnull RoutingContext ctx) {
-        @Nonnull val userId = ctx.get("userId");
+    public void addBoard(@Nonnull final RoutingContext ctx) {
+        val userId = ctx.get("userId");
         ctx.request().bodyHandler(buffer -> {
 
-            @Nonnull val board = new Board(
+            val board = new Board(
                     new ObjectId().toString(),
                     buffer.toString()
             );
 
-            @Nonnull val query = new JsonObject().put("_id", userId);
+            val boards = new JsonObject().put("boards", board.toUpdate());
 
-            @Nonnull val update = new JsonObject().put("$push", new JsonObject().put("boards", board.toUpdate()));
-            @Nonnull val options = new UpdateOptions().setUpsert(true);
+            val query = new JsonObject().put("_id", userId);
+            val update = new JsonObject().put("$push", boards);
+            val options = new UpdateOptions().setUpsert(true);
 
-            client.updateCollectionWithOptions(BOARDS, query, update, options,
+            client.updateCollectionWithOptions(
+                    BOARDS,
+                    query,
+                    update,
+                    options,
                     ar -> {
-                        if (ar.succeeded()) ctx.response().end(Json.encode(board.toJson()));
-                        else ctx.response().end(ar.cause().getMessage());
+                        if (ar.succeeded()) {
+                            ctx.response().end(Json.encode(board.toJson()));
+                        } else {
+                            ctx.response().end(ar.cause().getMessage());
+                        }
                     }
             );
         });
     }
 
     @Override
-    public void deleteBoard(@Nonnull RoutingContext ctx) {
-        String userId = ctx.get("userId");
-        System.out.println(userId);
+    public void deleteBoard(@Nonnull final RoutingContext ctx) {
+        val userId = ctx.get("userId");
         ctx.request().bodyHandler(buffer -> {
-            @Nonnull val id = buffer.toString();
-            @Nonnull val board = new Board(id,"");
+            val id = buffer.toString();
+            val board = new Board(id,"");
 
-            @Nonnull val query = new JsonObject().put("_id", userId);
-            @Nonnull val update = new JsonObject().put("$pull", new JsonObject().put("boards", board.toDelete()));
+            val query = new JsonObject().put("_id", userId);
+            val boards = new JsonObject()
+                    .put("boards", board.toDelete());
+            val update = new JsonObject().put(
+                    "$pull",
+                    boards
+            );
 
-            client.updateCollectionWithOptions(BOARDS, query, update, new UpdateOptions(),
+            client.updateCollectionWithOptions(
+                    BOARDS,
+                    query,
+                    update,
+                    new UpdateOptions(),
                     ar -> {
-                        if (ar.succeeded()) ctx.response().end(id);
-                        else ctx.response().end(ar.cause().getMessage());
+                        if (ar.succeeded()) {
+                            ctx.response().end(id);
+                        } else {
+                            ctx.response().end(
+                                    ar.cause()
+                                            .getMessage()
+                            );
+                        }
                     }
             );
         });
