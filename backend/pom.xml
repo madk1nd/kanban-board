@@ -21,7 +21,7 @@
         <junit-jupiter.version>5.2.0</junit-jupiter.version>
         <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
         <junit-platform-launcher.version>1.2.0</junit-platform-launcher.version>
-        <vertx.version>3.5.4</vertx.version>
+        <vertx.version>3.9.4</vertx.version>
         <postgresql.version>42.2.2</postgresql.version>
         <exec.mainClass>io.vertx.core.Launcher</exec.mainClass>
         <fabric8.vertx.plugin.version>1.0.0</fabric8.vertx.plugin.version>
